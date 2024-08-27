@@ -13,7 +13,7 @@ const GeneratorBar = () => {
         }}
         onTapStart={() => {setIsScaled(isScaled ? false : true),console.log("aah"+isScaled)}}
         style={{ scale: isScaled ? 1.2 : 1 }}
-        className="w-2/3 mx-auto mt-20"
+        className="max-w-[1180px] w-2/3 mx-auto mt-20"
       >
         <div className="relative">
           <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">

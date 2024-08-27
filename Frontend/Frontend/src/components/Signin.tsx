@@ -7,8 +7,7 @@ function Signin(){
     const updatesingin= useSetRecoilState(signinpop)
 
     return <div className="fixed inset-0 flex justify-center items-center text-red-400 bg-opacity-30 backdrop-blur-sm">
-<div></div>
-<div className="rounded-3xl bg-[#3e1f9c] items-center h-1/2 w-2/3">
+<div className="max-w-[660px] max-h-[442px] rounded-3xl bg-[#3e1f9c] items-center h-1/2 w-2/3">
 <div className="flex justify-end pr-8 pt-8">
 <button className="text-3xl text-[#c70074]" onClick={()=>updatesingin(false)}><IoClose /></button>
 </div>
@@ -26,8 +25,6 @@ function Signin(){
 </form>
 </div>
 </div>
-
-
     </div>
 }
 
