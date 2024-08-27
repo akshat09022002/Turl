@@ -14,7 +14,7 @@ const SignupBanner = () => {
                ease: [0, 0.71, 0.2, 1.01]
              }}
             className='w-full flex justify-center'>
-        <h1 className='mt-44 font-Roboto text-[#c70074] text-3xl font-medium'>Sign up to unlock exclusive features</h1>
+        <h1 className='font-Roboto text-[#c70074] font-medium  mt-20 text-lg sm:mt-44 sm:text-3xl '>Sign up to unlock exclusive features</h1>
         </motion.div>
         <CustomizationIntro></CustomizationIntro>
         <PageIntro></PageIntro>

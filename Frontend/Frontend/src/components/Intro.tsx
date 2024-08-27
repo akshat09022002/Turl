@@ -3,8 +3,8 @@ import Typewriter from 'typewriter-effect'
 
 const Intro = () => { 
     
-    return <div className='text-white font-Roboto text-5xl w-2/3 mx-auto mt-32'>
-    <div>
+    return <div className='text-white mx-2 sm:w-2/3 sm:mx-auto mt-32'>
+    <div className='font-Roboto text-3xl  sm:text-5xl'>
     <Typewriter
         options={{
             delay: 100,
@@ -17,7 +17,7 @@ const Intro = () => {
     />
     </div>
     
-    <div className='text-[#b5aec7] text-2xl pt-7 pl-3 h-32'>
+    <div className='font-Roboto text-[#b5aec7] text-base pt-7 h-[96px] sm:text-2xl  sm:pl-3 sm:h-32'>
     <Typewriter
         options={{
             strings: ["Effortlessly Shorten Your Links, Organize them into Secure, Password-Protected Pages, and Gain Insight with Advanced Performance Tracking."],
