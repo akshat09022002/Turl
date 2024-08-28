@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useSetRecoilState } from "recoil";
 import { signinpop, signuppop } from "../store/atoms/atom";
 import { useTransform, useTime } from "framer-motion";
+import { DrawerMenu } from "./DrawerMenu";
 
 const Navbar = () => {
   const updatesignin: any = useSetRecoilState(signinpop);
@@ -15,7 +16,7 @@ const Navbar = () => {
     <div className="flex flex-row justify-between text-white my-5">
       <div className="flex flex-row text-white">
         <motion.div
-          className="w-8 h-8 bg-white rounded-lg ml-5 sm:w-10 sm:h-10 "
+          className="w-8 h-8 mt-2 bg-white rounded-lg ml-5 sm:w-10 sm:h-10 "
           style={{ rotate }}
         />
         <motion.div
@@ -31,15 +32,15 @@ const Navbar = () => {
               restDelta: 0.001,
             },
           }}
-          className="text-2xl sm: text-white font-Robot ml-5 text-4xl"
+          className="text-3xl font-Robot pt-2 ml-4 sm:text-white sm:ml-5 sm:text-4xl"
         >
           Turl
         </motion.div>
       </div>
-      <div className="w-1/3 flex flex-row justify-end">
+      <div className="w-2/3 flex flex-row justify-end">
         <button
           onClick={() => updatesignin(true)}
-          className="text-white bg-[#3f2097] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg p-2.5 sm:text-sm sm:px-4 sm:py-2 sm:w-1/6 sm:bottom-2.5"
+          className="text-white bg-[#3f2097] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg text-xs py-0.5 px-4 sm:text-sm sm:px-4 sm:py-2 sm:w-1/6 sm:bottom-2.5"
         >
           Sign in
         </button>
@@ -48,6 +49,9 @@ const Navbar = () => {
           className="hidden sm:block sm:text-white sm:bg-[#c70074] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg sm:bottom-2.5 sm:text-sm sm:px-4 sm:mx-4 sm:py-2 sm:w-1/6"
         >
           Sign up
+        </button>
+        <button>
+          <DrawerMenu></DrawerMenu>
         </button>
       </div>
     </div>
