@@ -9,10 +9,10 @@ const CustomizationIntro = () => {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 2 }}
-          className="w-2/5 flex justify-center items-center"
+          className="w-2/5 flex justify-center items-center mr-14 sm:mr-12"
         >
           <img
-            className="max-w-60 bg-white rounded-lg w-[100px] h-[100px] sm:w-1/2 "
+            className="max-w-60 bg-white rounded-lg w-[110px] h-[110px] sm:w-[200px] sm:h-[200px] md:h-[250px] md:w-[250px] "
             src={customization}
           />
         </motion.div>
@@ -21,13 +21,13 @@ const CustomizationIntro = () => {
           initial={{ x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 2 }}
-          className="w-3/5 flex flex-col items-center ml-2"
+          className="w-3/5 flex flex-col items-center md:mr-12"
         >
-          <div>
-            <h1 className="font-Roboto  text-lg  mb-8 sm:text-2xl  sm:mb-12">
+          
+            <h1 className="font-semibold mb-8 text-lg  sm:text-2xl  sm:mb-12 ">
               Customised URL's
             </h1>
-            <ul className="list-disc font-Roboto text-xs pl-2 list text-start sm:text-lg">
+            <ul className="list-disc font-Roboto text-xs pl-2 list text-start sm:text-lg md:text-xl">
               <li className="py-2">
                 Take control of your URLs by selecting your preferred UID.
               </li>
@@ -40,7 +40,7 @@ const CustomizationIntro = () => {
                 single, convenient location.
               </li>
             </ul>
-          </div>
+          
         </motion.div>
       </div>
     </div>

@@ -46,11 +46,10 @@ export function DrawerMenu() {
             </div>
           </Drawer.Items>
           <DrawerItems className="text-white font-bold mt-10 sm:mt-24">
-            <ul className=" text-start text-lg sm:text-2xl sm:ml-4">
-              <li className="py-6 sm:py-8">Profile</li>
-              <li className="py-6 sm:py-8">URLs</li>
-              <li className="py-6 sm:py-8">My Pages</li>
-              <li className="py-6 sm:py-8">Settings</li>
+            <ul className=" text-start text-base sm:text-2xl sm:ml-4">
+              <li className="py-4 sm:py-8">URLs</li>
+              <li className="py-4 sm:py-8">My Pages</li>
+              <li className="py-4 sm:py-8">Settings</li>
             </ul>
           </DrawerItems>
         </CardSpotlight>

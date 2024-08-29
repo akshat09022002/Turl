@@ -10,11 +10,11 @@ const PageIntro = () => {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 2 }}
-          className="w-3/5 flex flex-col items-center"
+          className="w-3/5 flex flex-col items-center ml-2 sm:ml-12 md:ml-16"
         >
-          <div>
-            <h1 className="font-Roboto  text-lg  mb-8 sm:text-2xl  sm:mb-12">Create URL Pages</h1>
-            <ul className="list-disc font-Roboto text-xs pl-2 list text-start sm:text-lg">
+          
+            <h1 className="font-semibold  text-lg  mb-8 sm:text-2xl  sm:mb-12">Create URL Pages</h1>
+            <ul className="list-disc font-Roboto text-xs list text-start pl-2 sm:text-lg md:text-xl">
               <li className="py-1">
                 Effortlessly organize your URLs in one convenient location
               </li>
@@ -25,15 +25,15 @@ const PageIntro = () => {
               <li className="py-1">Easily share your curated page with friends</li>
               <li className="py-1">Store up to 50 URLs on each meticulously crafted page</li>
             </ul>
-          </div>
+          
         </motion.div>
         <motion.div
           initial={{ x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 2 }}
-          className="w-2/5 flex justify-center items-center"
+          className="w-2/5 flex justify-center items-center ml-8"
         >
-          <img className="max-w-60 rounded-lg w-[100px] h-[100px] sm:w-1/2 " src={pages} />
+          <img className="max-w-60 rounded-lg w-[110px] h-[110px] sm:w-[200px] sm:h-[200px]  md:w-[250px] md:h-[250px]" src={pages} />
         </motion.div>
       </div>
     </div>
