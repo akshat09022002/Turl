@@ -3,7 +3,7 @@ import { Button, Drawer, DrawerItems } from "flowbite-react";
 import { useState } from "react";
 import type { CustomFlowbiteTheme } from "flowbite-react";
 import { Avatar } from "flowbite-react";
-import { CardSpotlight } from "./ui/card-spotlight";
+import { CardSpotlight } from "../ui/card-spotlight";
 
 export function DrawerMenu() {
   const [isOpen, setIsOpen] = useState(false);

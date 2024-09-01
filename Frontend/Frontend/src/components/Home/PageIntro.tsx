@@ -1,6 +1,6 @@
-import pages from "../pages/pictures/pages.jpeg";
+import pages from "../../pages/pictures/pages.jpeg";
 import { motion } from "framer-motion";
-import "../font.css";
+import "../../font.css";
 
 const PageIntro = () => {
   return (

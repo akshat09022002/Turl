@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import customization from "../pages/pictures/customization.png";
+import customization from "../../pages/pictures/customization.png";
 
 const CustomizationIntro = () => {
   return (

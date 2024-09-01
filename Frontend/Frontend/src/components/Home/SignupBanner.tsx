@@ -1,6 +1,6 @@
-import CustomizationIntro from '../components/CustomizationIntro';
-import PageIntro from '../components/PageIntro';
-import '../font.css';
+import CustomizationIntro from './CustomizationIntro';
+import PageIntro from './PageIntro';
+import '../../font.css';
 import { motion } from "framer-motion"
 
 const SignupBanner = () => {

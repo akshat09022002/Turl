@@ -1,5 +1,5 @@
 import { FaCopy } from "react-icons/fa";
-import { urlResult } from "../store/atoms/atom";
+import { urlResult } from "../../store/atoms/atom";
 import { useRecoilValue } from "recoil";
 
 const UrlResult = () => {

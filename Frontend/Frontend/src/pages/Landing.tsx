@@ -1,13 +1,13 @@
 import '../font.css'
-import UrlResult from '../components/UrlResult'
-import Signin from '../components/Signin'
-import Signup from '../components/Signup'
-import Navbar from '../components/Navbar';
-import Intro from '../components/Intro';
+import UrlResult from '../components/Home/UrlResult'
+import Signin from '../components/Home/Signin'
+import Signup from '../components/Home/Signup'
+import Navbar from '../components/Home/Navbar';
+import Intro from '../components/Home/Intro';
 import { useRecoilValue } from 'recoil';
 import { signinpop,signuppop }  from '../store/atoms/atom';
-import GeneratorBar from '../components/GeneratorBar';
-import SignupBanner from '../components/SignupBanner';
+import GeneratorBar from '../components/Home/GeneratorBar';
+import SignupBanner from '../components/Home/SignupBanner';
 
 
 

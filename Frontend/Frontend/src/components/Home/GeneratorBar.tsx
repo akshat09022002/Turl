@@ -1,4 +1,4 @@
-import { PlaceholdersAndVanishInput } from "./ui/placeholders-and-vanish-input";
+import { PlaceholdersAndVanishInput } from "../ui/placeholders-and-vanish-input";
 
 const GeneratorBar = () => {
   return (

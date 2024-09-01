@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './App.css'
 import Landing from './pages/Landing'
 import { RecoilRoot } from'recoil'
+import Pages from './pages/Pages'
 
 function App() {
 
@@ -12,6 +13,7 @@ function App() {
    <BrowserRouter>
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/pages" element={<Pages/>}/>
     </Routes>
    </BrowserRouter>
    </RecoilRoot>

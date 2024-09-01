@@ -1,4 +1,4 @@
-import '../font.css'
+import '../../font.css'
 import Typewriter from 'typewriter-effect'
 
 const Intro = () => { 

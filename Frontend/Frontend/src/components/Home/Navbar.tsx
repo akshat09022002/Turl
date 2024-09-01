@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useSetRecoilState } from "recoil";
-import { signinpop, signuppop } from "../store/atoms/atom";
+import { signinpop, signuppop } from "../../store/atoms/atom";
 import { useTransform, useTime } from "framer-motion";
 import { DrawerMenu } from "./DrawerMenu";
 
