@@ -1,21 +1,29 @@
-import { useSetRecoilState } from "recoil";
-import { signuppop } from "../../store/atoms/atom";
-import { IoClose } from "react-icons/io5";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "@/hooks/use-toast";
+import { Spinner } from "@/components/ui/spinner";
+import DialogWindowHome from "./DialogWindowHome";
+import OtpInput from "./OtpInput";
 
 function Signup() {
-  const updatesingup = useSetRecoilState(signuppop);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isOpenDialog, setIsOpenDialog] = useState(false);
+  const [customComponent, setCustomComponent] = useState<React.ReactNode>(null);
+
+  useEffect(() => {
+    setLoading(false);
+  }, []);
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center bg-opacity-30 backdrop-blur-sm">
-      <div className="bg-[#c70074] rounded-3xl w-11/12 sm:w-2/3 md:w-1/2 lg:w-1/3 xl:w-1/4 p-4 sm:p-8">
-        <div className="flex justify-end">
-          <button
-            className="text-[#3e1f9c] text-xl sm:text-3xl"
-            onClick={() => updatesingup(false)}
-          >
-            <IoClose />
-          </button>
-        </div>
+    <>
+      <DialogWindowHome isOpen={isOpenDialog} setIsOpen={setIsOpenDialog}>
+        {customComponent}
+      </DialogWindowHome>
+      <div className="w-full h-full p-12 bg-[#cc1b6c] rounded-md">
         <form className="space-y-5">
           <div>
             <label className="block mb-2 text-md font-medium text-[#3e1f9c]">
@@ -24,6 +32,7 @@ function Signup() {
             <input
               type="text"
               id="first_name"
+              onChange={(e) => setFirstName(e.target.value)}
               className="bg-gray-50 border border-gray-300 text-black text-sm rounded-lg w-full p-2.5"
               placeholder="John"
               required
@@ -36,6 +45,7 @@ function Signup() {
             <input
               type="text"
               id="last_name"
+              onChange={(e) => setLastName(e.target.value)}
               className="bg-gray-50 border border-gray-300 text-black text-sm rounded-lg w-full p-2.5"
               placeholder="Doe"
               required
@@ -48,6 +58,7 @@ function Signup() {
             <input
               type="email"
               id="email"
+              onChange={(e) => setEmail(e.target.value)}
               className="bg-gray-50 border border-gray-300 text-black text-sm rounded-lg w-full p-2.5"
               placeholder="name@email.xyz"
               required
@@ -60,20 +71,57 @@ function Signup() {
             <input
               type="password"
               id="password"
+              onChange={(e) => setPassword(e.target.value)}
               className="bg-gray-50 border border-gray-300 text-black text-sm rounded-lg w-full p-2.5"
               placeholder="eg. abcd"
               required
             />
           </div>
-          <button
-            type="submit"
-            className="w-full text-white bg-[#3e1f9c] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg text-sm px-4 py-2"
-          >
-            Submit
-          </button>
+          <span className="flex flex-row justify-center w-full">
+            {loading ? (
+              <Spinner className="text-[#3e1f9c]" />
+            ) : (
+              <button
+                onClick={async (e) => {
+                  setLoading(true);
+                  e.preventDefault();
+                  try {
+                    await axios
+                      .post<{ msg: string }>(
+                        `${import.meta.env.VITE_BACKEND_API}/user/signup`,
+                        {
+                          firstName,
+                          lastName,
+                          email,
+                          password,
+                        },{
+                          withCredentials:true,
+                        }
+                      )
+                      .then((response) => {
+                        setLoading(false);
+                        toast({
+                          title: response.data.msg,
+                        });
+                        setCustomComponent(<OtpInput />);
+                        setIsOpenDialog(true);
+                      });
+                  } catch (error: any) {
+                    toast({
+                      title: error.response.data.msg,
+                    });
+                    setLoading(false);
+                  }
+                }}
+                className="w-2/3 align-center text-white bg-[#3e1f9c] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg text-sm px-4 py-2"
+              >
+                Signup
+              </button>
+            )}
+          </span>
         </form>
       </div>
-    </div>
+    </>
   );
 }
 

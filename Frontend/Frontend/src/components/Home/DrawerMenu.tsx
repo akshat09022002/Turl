@@ -3,7 +3,7 @@ import { Button, Drawer, DrawerItems } from "flowbite-react";
 import { useState } from "react";
 import type { CustomFlowbiteTheme } from "flowbite-react";
 import { Avatar } from "flowbite-react";
-import { CardSpotlight } from "../ui/card-spotlight";
+import { CardSpotlight } from "../ui2/card-spotlight";
 
 export function DrawerMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +25,7 @@ export function DrawerMenu() {
           color="primary"
           onClick={() => setIsOpen(true)}
         >
-          <IoIosMenu className="text-3xl"></IoIosMenu>
+          <IoIosMenu className="text-4xl"></IoIosMenu>
         </Button>
       </div>
 
@@ -42,7 +42,9 @@ export function DrawerMenu() {
                 {" "}
                 <Avatar rounded bordered size="lg" color="white" />
               </div>
-              <div className="mt-4 text-lg text-white font-extrabold">John Doe</div>
+              <div className="mt-4 text-lg text-white font-extrabold">
+                John Doe
+              </div>
             </div>
           </Drawer.Items>
           <DrawerItems className="text-white font-bold mt-10 sm:mt-24">

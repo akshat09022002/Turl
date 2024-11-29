@@ -1,14 +1,18 @@
 // passport-setup.js
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '../secret';
+import dotenv from 'dotenv';
 import { userCredenType } from '../schema';
 import bcrypt from 'bcrypt';
 
 dotenv.config();
 const prisma = new PrismaClient();
+
+const GOOGLE_CLIENT_ID=process.env.GOOGLE_CLIENT_ID
+const GOOGLE_CLIENT_SECRET= process.env.GOOGLE_CLIENT_SECRET
+
+if(!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) throw Error("No Google Client Credentials Present");
 
 async function generateRandomPassword() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);

@@ -1,16 +1,30 @@
-import { PlaceholdersAndVanishInput } from "../ui/placeholders-and-vanish-input";
+import { useEffect, useState } from "react";
+import { PlaceholdersAndVanishInput } from "../ui2/placeholders-and-vanish-input";
+import UrlResult from "./UrlResult";
 
 const GeneratorBar = () => {
+  const [input, setInput] = useState<string>("");
+  const [urlResult, setUrlResult] = useState("");
+
+  useEffect(() => {}, [urlResult]);
+
   return (
     <>
-      <div className="mt-20 sm:mt-24">
+      <div className="mt-20 sm:mt-24 ">
         <PlaceholdersAndVanishInput
           placeholders={["Enter a URL to shorten"]}
-          onChange={(e) => e.target.value}
+          onChange={(e) => setInput(e.target.value)}
           onSubmit={() => {
-            console.log("submitted");
+            setUrlResult(input);
           }}
         ></PlaceholdersAndVanishInput>
+
+        {urlResult != "" && (
+          <UrlResult
+            urlResult={urlResult}
+            setUrlResult={setUrlResult}
+          ></UrlResult>
+        )}
       </div>
     </>
   );

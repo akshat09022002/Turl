@@ -2,14 +2,18 @@ import express from 'express';
 import { urlDetailType,pageDetailType, pageDetail } from '../schema';
 import { PrismaClient } from '@prisma/client'
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { JWT_SECRET } from '../secret';
+import dotevn from 'dotenv';
 import cookieParser from 'cookie-parser';
 
 const prisma = new PrismaClient()
 
+dotevn.config();
 const app= express();
 app.use(express.json());
 app.use(cookieParser());
+
+const JWT_SECRET=process.env.JWT_SECRET;
+if(!JWT_SECRET) throw Error("No JWT Present");
 
 const router= express.Router();
 
