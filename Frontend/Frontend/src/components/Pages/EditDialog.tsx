@@ -9,6 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { Button } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -29,13 +30,18 @@ const EditDialog = () => {
 
   const { toast } = useToast();
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-
-    toast({
-      title: "Description Updated",
-      description: values.newDescription,
-    });
+  const onSubmit = async(values: z.infer<typeof formSchema>) => {
+    await axios.post(`${import.meta.env.VITE_BACKEND_API}/pages/updatePage`,{
+      description:values.newDescription,
+      password: undefined
+    },{
+      withCredentials: true,
+    }).then(()=>{
+      toast({
+        title: "Description Updated",
+        description: values.newDescription,
+      });
+    })
   };
 
   return (
@@ -47,7 +53,7 @@ const EditDialog = () => {
             name="newDescription"
             render={({ field }) => (
               <FormItem className="mt-4">
-                <FormLabel><div className="w-full text-start pl-2 text-sm">Edit Description</div></FormLabel>
+                <FormLabel><div className="w-full text-start pl-2 text-sm">Description</div></FormLabel>
                 <FormControl>
                   <Input
                     className="mt-2"

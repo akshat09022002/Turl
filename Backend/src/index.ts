@@ -4,6 +4,7 @@ import { urlRoute } from "./routes/url";
 import { userRoute } from "./routes/user";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import { pageRoute } from "./routes/page";
 
 dotenv.config();
 const app = express();
@@ -16,6 +17,7 @@ app.use(cors({
     credentials: true,
 }));
 app.use("/user", userRoute);
-app.use("/tinyurl", urlRoute);
+app.use("/pages",pageRoute);
+app.use("/", urlRoute);
 
 app.listen(PORT);

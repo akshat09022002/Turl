@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { Button } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -35,13 +36,24 @@ const PasswordDialog = () => {
 
   const { toast } = useToast();
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-
-    toast({
-      title: "Password Updated",
-      description: values.newPassword,
-    });
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    await axios
+      .post(
+        `${import.meta.env.VITE_BACKEND_API}/pages/updatePage`,
+        {
+          password: values.newPassword,
+          description: undefined,
+        },
+        {
+          withCredentials: true,
+        }
+      )
+      .then(() => {
+        toast({
+          title: "Password Updated",
+          description: values.newPassword,
+        });
+      });
   };
 
   return (
@@ -66,13 +78,18 @@ const PasswordDialog = () => {
                   />
                 </FormControl>
                 <FormDescription className="mt-2">
-                  <div className="w-full text-start">*Leave blank to remove the password.</div>
+                  <div className="w-full text-start">
+                    *Leave blank to remove the password.
+                  </div>
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button className="mt-4 bg-[#cc1b6c] hover:bg-blue-800] font-semibold" type="submit">
+          <Button
+            className="mt-4 bg-[#cc1b6c] hover:bg-blue-800] font-semibold"
+            type="submit"
+          >
             Submit
           </Button>
         </form>

@@ -5,7 +5,11 @@ import { Spinner } from "@/components/ui/spinner";
 import DialogWindowHome from "./DialogWindowHome";
 import OtpInput from "./OtpInput";
 
-function Signup() {
+function Signup({
+  setSignupClose,
+}: {
+  setSignupClose: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -87,23 +91,31 @@ function Signup() {
                   e.preventDefault();
                   try {
                     await axios
-                      .post<{ msg: string }>(
+                      .post<{msg:string,firstName:string,lastName:string | null,email: string}>(
                         `${import.meta.env.VITE_BACKEND_API}/user/signup`,
                         {
                           firstName,
                           lastName,
                           email,
                           password,
-                        },{
-                          withCredentials:true,
+                        },
+                        {
+                          withCredentials: true,
                         }
                       )
                       .then((response) => {
                         setLoading(false);
+                        localStorage.setItem('user',JSON.stringify({
+                          firstName:response.data.firstName,
+                          lastName:response.data.lastName,
+                          email:response.data.email
+                        }))
                         toast({
                           title: response.data.msg,
                         });
-                        setCustomComponent(<OtpInput />);
+                        setCustomComponent(
+                          <OtpInput setIsOpenDialog={setIsOpenDialog} setSignupClose={setSignupClose}/>
+                        );
                         setIsOpenDialog(true);
                       });
                   } catch (error: any) {

@@ -3,7 +3,7 @@ import { urlDetailType } from "../schema";
 import { PrismaClient } from "@prisma/client";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import cookieParser from "cookie-parser";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config();
 const prisma = new PrismaClient();
@@ -13,20 +13,34 @@ app.use(express.json());
 app.use(cookieParser());
 
 const JWT_SECRET = process.env.JWT_SECRET;
-console.log("JWT Secret "+process.env.JWT_SECRET);
-if (!JWT_SECRET) throw Error("No JWT secret present");
 
+if (!JWT_SECRET) throw Error("No JWT secret present");
 
 const router = express.Router();
 
+function generateRandomCode(): string {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let code = "";
+
+  for (let i = 0; i < 5; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    code += characters[randomIndex];
+  }
+
+  return code;
+}
+
 router.post("/generateUrl", async (req, res) => {
-  const response: urlDetailType = await req.body;
-  const jwtuserId: string = req.cookies.token;
-
-  const userId: JwtPayload = jwt.verify(jwtuserId, JWT_SECRET) as JwtPayload;
-
   try {
-    if (userId.userid) {
+    const response: urlDetailType = await req.body;
+    const jwtuserId: string = req.cookies.token;
+    
+   
+    if (jwtuserId!="") {
+    
+      const userId: JwtPayload = jwt.verify(jwtuserId, JWT_SECRET) as JwtPayload;
+
       console.log(userId.userid);
 
       const isUserPresent = await prisma.user.findUnique({
@@ -41,9 +55,12 @@ router.post("/generateUrl", async (req, res) => {
         });
       }
 
+      const UID = generateRandomCode();
+
       const extractor = await prisma.uRL.create({
         data: {
           url: response.url,
+          uid: UID,
           lastVisit: new Date(),
           visitorCount: 0,
           userId: userId.userid,
@@ -51,11 +68,14 @@ router.post("/generateUrl", async (req, res) => {
       });
 
       return res.status(200).json({
-        "short url": "tinyurl/" + extractor.id + ".turl.co.in",
+        short_url: "http://localhost:3000/" + UID,
       });
     } else {
+     
+      const UID = generateRandomCode();
       const extractor = await prisma.uRL.create({
         data: {
+          uid: UID,
           url: response.url,
           lastVisit: new Date(),
           visitorCount: 0,
@@ -63,7 +83,7 @@ router.post("/generateUrl", async (req, res) => {
       });
 
       return res.status(200).json({
-        "short url": "tinyurl/" + extractor.id + ".turl.co.in",
+        short_url: "http://localhost:3000/" + UID,
       });
     }
   } catch {
@@ -74,32 +94,33 @@ router.post("/generateUrl", async (req, res) => {
 });
 
 router.get("/*", async (req, res) => {
-  const fullPath: { [key: string]: string } = req.params;
-  console.log(fullPath["0"].split(".")[0]);
+  const fullPath:string=JSON.parse(JSON.stringify(req.params))['0'];
 
   try {
-    const finder = await prisma.uRL.findMany({
+    const finder = await prisma.uRL.findUnique({
       where: {
-        id: fullPath["0"].split(".")[0],
+        uid: fullPath
       },
     });
 
-    if (finder.length == 0) {
+    if (!finder) {
       return res.status(403).json({
         error: "url not found",
       });
     } else {
       const update = await prisma.uRL.update({
         where: {
-          id: fullPath["0"].split(".")[0],
+          uid: fullPath,
         },
         data: {
           lastVisit: new Date(),
-          visitorCount: finder[0].visitorCount + 1,
+          visitorCount: {
+            increment: 1
+          }
         },
       });
 
-      return res.status(200).redirect(finder[0].url);
+      return res.status(200).redirect(finder.url);
     }
   } catch {
     return res.status(404).json({

@@ -24,6 +24,8 @@ import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { Spinner } from "@/components/ui/spinner";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useSetRecoilState } from "recoil";
+import { isSignedIn } from "@/store/atoms/atom";
 
 const FormSchema = z.object({
   pin: z.string().min(6, {
@@ -31,8 +33,9 @@ const FormSchema = z.object({
   }),
 });
 
-const OtpInput = () => {
+const OtpInput = ({setIsOpenDialog,setSignupClose}:{setIsOpenDialog:React.Dispatch<React.SetStateAction<boolean>>,setSignupClose:React.Dispatch<React.SetStateAction<boolean>>}) => {
   const [loading, setloading] = useState(false);
+  const setLoggedIn=useSetRecoilState(isSignedIn);
 
   useEffect(() => {
     setloading(false);
@@ -63,6 +66,9 @@ const OtpInput = () => {
           toast({
             title: response.data.msg,
           });
+          setIsOpenDialog(false);
+          setSignupClose(false);
+          setLoggedIn(true);
         });
     } catch (error: any) {
       toast({
@@ -70,6 +76,7 @@ const OtpInput = () => {
       });
     } finally {
       setloading(false);
+      
     }
   }
 

@@ -78,8 +78,7 @@ const UrlResult = ({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // write submit logic here
-    console.log("submitted");
+    
   }
 
   const { reset } = form;

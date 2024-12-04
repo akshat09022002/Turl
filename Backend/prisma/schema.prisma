@@ -28,8 +28,8 @@ model User{
 
 model Page{
   id String @id @default(uuid())
-  title String
-  description String?
+  pageUID String @unique
+  description String
   password String?
   visitorCount Int
   urls URL[]
@@ -40,6 +40,7 @@ model Page{
 
 model URL{
   id String @id @default(uuid())
+  uid String @unique
   pageId String?
   description String? 
   page Page? @relation(fields: [pageId], references: [id])

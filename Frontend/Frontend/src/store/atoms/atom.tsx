@@ -5,3 +5,8 @@ export const openDialogHome = atom({
   default: false,
 });
 
+export const isSignedIn= atom({
+  key:"isSignedIn",
+  default: false
+})
+

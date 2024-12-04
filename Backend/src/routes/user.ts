@@ -41,25 +41,25 @@ router.post("/signup", async (req, res) => {
   }
 
   try {
-    const response = await prisma.user.findMany({
+    const response = await prisma.user.findUnique({
       where: {
         email: userDetails.email,
       },
     });
 
-    if (response.length > 0) {
+    if (response) {
       return res.status(403).json({
         msg: "user already exists",
       });
     }
 
-    const ispresent = await prisma.otp.findMany({
+    const ispresent = await prisma.otp.findUnique({
       where: {
         email: userDetails.email,
       },
     });
 
-    if (ispresent.length > 0) {
+    if (ispresent) {
       await prisma.otp.update({
         where: {
           email: userDetails.email,
@@ -78,30 +78,27 @@ router.post("/signup", async (req, res) => {
         },
       });
     }
+
+    res.cookie("user", JSON.stringify(userDetails), {
+      httpOnly: true,
+      secure: true,
+      maxAge: 60 * 1000,
+      sameSite: "none",
+    });
+
+    await sendOtpEmail(userDetails.email, OTP).then((response) => {
+      return res.status(200).json({
+        msg: response,
+      });
+    });
   } catch {
     res.status(400).json({
       msg: "something went wrong",
     });
   }
-
- 
-  res.cookie("user", JSON.stringify(userDetails), {
-    httpOnly: true,
-    secure: true,
-    maxAge: 60 * 1000,
-    sameSite: "none",
-  });
-
-  await sendOtpEmail(userDetails.email, OTP).then((response)=>{
-    return res.status(200).json({
-      msg: response,
-    });
-  });
-
-  
 });
 
-router.get("/login", async (req, res) => {
+router.post("/login", async (req, res) => {
   const userDetails: loginCredenType = await req.body;
 
   const inputCheck = loginCreden.safeParse(userDetails);
@@ -144,9 +141,13 @@ router.get("/login", async (req, res) => {
 
       return res.status(200).json({
         msg: "login successful",
+        firstName: response.firstName.toUpperCase(),
+        lastName: response.lastName?.toUpperCase(),
+        email: response.email.toLowerCase(),
       });
     });
-  } catch {
+  } catch (err) {
+    console.log(err);
     res.clearCookie("user");
 
     return res.status(401).json({
@@ -156,20 +157,16 @@ router.get("/login", async (req, res) => {
 });
 
 router.get("/verify-otp", async (req, res) => {
-  const userDetails: userCredenType = JSON.parse(req.cookies.user);
-  let inotp = req.query.otp;
-  
-
   try {
+    const userDetails: userCredenType = JSON.parse(req.cookies.user);
+    let inotp = req.query.otp;
     const response = await prisma.otp.findUnique({
       where: {
         email: userDetails.email,
       },
     });
 
-    console.log(response);
-
-    if (response==null || response.expiresAt < new Date()) {
+    if (response == null || response.expiresAt < new Date()) {
       return res.status(401).json({
         msg: "invalid request",
       });
@@ -199,6 +196,9 @@ router.get("/verify-otp", async (req, res) => {
 
       return res.status(200).json({
         msg: "signed up successfully",
+        firstName: userDetails.firstName.toUpperCase(),
+        lastName: userDetails.lastName?.toUpperCase(),
+        email: userDetails.email.toLowerCase(),
       });
     } else {
       return res.status(401).json({
@@ -233,10 +233,22 @@ router.get("/verify-otp", async (req, res) => {
 //   });
 
 router.get("/logout", (req, res) => {
-  res.clearCookie("token");
-  return res.status(200).json({
-    msg: "logout successful",
-  });
+  try{
+    res.clearCookie("token",{
+      httpOnly: true,
+      secure: false,
+      maxAge: 60 * 24 * 60 * 60 * 1000,
+    });
+  
+    return res.status(200).json({
+      msg: "logout successful",
+    });
+  }catch(err){
+    return res.status(401).json({
+      msg:"Something Went Wrong"
+    })
+  }
+  
 });
 
 export const userRoute = router;

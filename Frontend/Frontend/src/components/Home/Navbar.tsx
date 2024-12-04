@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
 import { useTransform, useTime } from "framer-motion";
 import { DrawerMenu } from "./DrawerMenu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Signin from "./Signin";
 import Signup from "./Signup";
 import DialogWindowHome from "./DialogWindowHome";
+import { useRecoilState } from "recoil";
+import { isSignedIn } from "@/store/atoms/atom";
 
 const Navbar = () => {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
@@ -14,9 +16,14 @@ const Navbar = () => {
 
   const rotate = useTransform(time, [0, 10000], [0, 360], { clamp: false });
 
-  // useEffect(() => {
-  //   setIsOpenDialog(false);
-  // });
+  const [isLoggedIn, setLoggedIn] = useRecoilState(isSignedIn);
+
+  useEffect(() => {
+    console.log("setting");
+    const userDetails = localStorage.getItem("user");
+    if (userDetails) setLoggedIn(true);
+    else setLoggedIn(false);
+  }, [isLoggedIn]);
 
   return (
     <>
@@ -48,24 +55,32 @@ const Navbar = () => {
           </motion.div>
         </div>
         <div className="w-2/3 flex flex-row justify-end">
-          <button
-            onClick={() => {
-              setIsOpenDialog(true);
-              setCustomComponent(<Signin />);
-            }}
-            className="text-white bg-[#3f2097] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg text-xs py-0.5 px-4 sm:text-sm sm:px-4 sm:py-2 sm:w-1/6 sm:bottom-2.5"
-          >
-            Sign in
-          </button>
-          <button
-            onClick={() => {
-              setIsOpenDialog(true);
-              setCustomComponent(<Signup />);
-            }}
-            className="hidden sm:block sm:text-white sm:bg-[#c70074] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg sm:bottom-2.5 sm:text-sm sm:px-4 sm:mx-4 sm:py-2 sm:w-1/6"
-          >
-            Sign up
-          </button>
+          {isLoggedIn ? null : (
+            <>
+              <button
+                onClick={() => {
+                  setIsOpenDialog(true);
+                  setCustomComponent(
+                    <Signin setSigninClose={setIsOpenDialog} />
+                  );
+                }}
+                className="hidden sm:block text-white bg-[#3f2097] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg text-xs py-0.5 px-4 sm:text-sm sm:px-4 sm:py-2 sm:w-1/6 sm:bottom-2.5"
+              >
+                Sign in
+              </button>
+              <button
+                onClick={() => {
+                  setIsOpenDialog(true);
+                  setCustomComponent(
+                    <Signup setSignupClose={setIsOpenDialog} />
+                  );
+                }}
+                className="hidden sm:block sm:text-white bg-[#c70074] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg sm:bottom-2.5 sm:text-sm sm:px-4 sm:mx-4 sm:py-2 sm:w-1/6"
+              >
+                Sign up
+              </button>
+            </>
+          )}
           <button>
             <DrawerMenu></DrawerMenu>
           </button>

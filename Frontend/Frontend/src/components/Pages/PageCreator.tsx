@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import axios from "axios";
 
 const FormSchema = z.object({
   description: z.string().min(10, {
@@ -47,7 +48,7 @@ const PageCreator = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       description: "",
-      urlPrefix: "https://prefixURL/",
+      urlPrefix: "http://localhost:3000/pg",
       customUID: "",
       password: "",
     },
@@ -55,16 +56,31 @@ const PageCreator = () => {
 
   const { toast } = useToast();
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log("Form submitted:", data);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    try {
+      await axios
+        .post<{ msg: string }>(
+          `${import.meta.env.VITE_BACKEND_API}/pages/createPage`,
+          {
+            description: data.description,
+            customUID: data.customUID,
+            password: data.password,
+          },
+          {
+            withCredentials: true,
+          }
+        )
+        .then((response) => {
+          console.log(response.data);
+          toast({
+            title: response.data.msg,
+          });
+        });
+    } catch (err: any) {
+      toast({
+        title: err.response.data.msg,
+      });
+    }
   }
 
   return (

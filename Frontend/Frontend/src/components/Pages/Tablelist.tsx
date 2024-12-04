@@ -29,6 +29,7 @@ import {
 import DialogWindow from "./DialogWindow";
 import PasswordDialog from "./PasswordDialog";
 import EditDialog from "./EditDialog";
+import axios from "axios";
 
 type urlType = {
   Description: string;
@@ -42,7 +43,7 @@ const Tablelist = () => {
   const [data, setData] = useState<urlType[]>([]);
   const [title, setTitle] = useState<string>("");
 
-  console.log("ohh yeah re");
+  
 
   const columns: ColumnDef<urlType>[] = [
     {
@@ -128,6 +129,7 @@ const Tablelist = () => {
     },
   ];
 
+ 
   useEffect(() => {
     setData([
       {
