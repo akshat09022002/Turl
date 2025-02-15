@@ -233,22 +233,21 @@ router.get("/verify-otp", async (req, res) => {
 //   });
 
 router.get("/logout", (req, res) => {
-  try{
-    res.clearCookie("token",{
+  try {
+    res.clearCookie("token", {
       httpOnly: true,
       secure: false,
       maxAge: 60 * 24 * 60 * 60 * 1000,
     });
-  
+
     return res.status(200).json({
       msg: "logout successful",
     });
-  }catch(err){
+  } catch (err) {
     return res.status(401).json({
-      msg:"Something Went Wrong"
-    })
+      msg: "Something Went Wrong",
+    });
   }
-  
 });
 
 export const userRoute = router;

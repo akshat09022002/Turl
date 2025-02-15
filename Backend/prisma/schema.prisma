@@ -43,7 +43,7 @@ model URL{
   uid String @unique
   pageId String?
   description String? 
-  page Page? @relation(fields: [pageId], references: [id])
+  page Page? @relation(fields: [pageId], references: [pageUID])
   userId String?
   user User? @relation(fields: [userId], references: [id])
   url String

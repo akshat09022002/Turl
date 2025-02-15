@@ -7,6 +7,7 @@ import Test from "./pages/Test";
 import { Toaster } from "./components/ui/toaster";
 import { isSignedIn } from "./store/atoms/atom";
 import { useEffect } from "react";
+import UrlPage from "./pages/UrlPage";
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/pages" element={<Pages />} />
             <Route path="/test" element={<Test/>}/>
+            <Route path="/pg/:id" element={<UrlPage/>}/>
           </Routes>
         </BrowserRouter>
       </RecoilRoot>

@@ -5,6 +5,7 @@ import { userRoute } from "./routes/user";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { pageRoute } from "./routes/page";
+import { xlsiRoute } from "./routes/convertToXLSI";
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,7 @@ app.use(cors({
 }));
 app.use("/user", userRoute);
 app.use("/pages",pageRoute);
+app.use("/xlsi",xlsiRoute);
 app.use("/", urlRoute);
 
 app.listen(PORT);

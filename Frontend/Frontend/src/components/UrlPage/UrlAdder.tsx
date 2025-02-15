@@ -18,7 +18,8 @@ import {
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { useSetRecoilState } from "recoil";
-import { rerender } from "@/store/atoms/atom";
+import { rerenderPage } from "@/store/atoms/atom";
+import { useParams } from "react-router-dom";
 import { useDebounceValue } from "usehooks-ts";
 import { useEffect, useState } from "react";
 import { Spinner } from "../ui/spinner";
@@ -27,6 +28,9 @@ import CustomTooltip from "../common/CustomTooltip";
 const FormSchema = z.object({
   description: z.string().min(10, {
     message: "Description must be at least 10 characters.",
+  }),
+  url: z.string().url({
+    message: "This field must be a url",
   }),
   customUID: z
     .string()
@@ -39,36 +43,25 @@ const FormSchema = z.object({
     .regex(/^[a-zA-Z0-9]+$/, "Custom UID can only contain letters and numbers.")
     .optional()
     .or(z.literal("")),
-  password: z
-    .string()
-    .min(5, {
-      message: "password should have min 5 characters",
-    })
-    .optional()
-    .or(z.literal("")),
-  urlPrefix: z.string().optional(),
+  urlPrefix: z.string(),
 });
 
-const PageCreator = () => {
-  const setRerender = useSetRecoilState(rerender);
+const UrlAdder = () => {
+  const setRerender = useSetRecoilState(rerenderPage);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       description: "",
-      urlPrefix: "localhost:3000/pg",
+      urlPrefix: "localhost:3000/",
       customUID: "",
-      password: "",
+      url: "",
     },
   });
-
   const customUID = form.watch("customUID");
   const [debounceValue, debounceState] = useDebounceValue(customUID, 300);
   const [debounceLoader, setDebounceLoader] = useState(false);
   const [canAdd, setCanAdd] = useState(true);
-
-  const { toast } = useToast();
-
   useEffect(() => {
     if (!debounceValue) return;
 
@@ -79,9 +72,7 @@ const PageCreator = () => {
       setDebounceLoader(true);
       try {
         const response = await axios.post<{ result: boolean }>(
-          `${
-            import.meta.env.VITE_BACKEND_API
-          }/pages/isValidUID/${debounceValue}`,
+          `${import.meta.env.VITE_BACKEND_API}/isValidUID/${debounceValue}`,
           {
             withCredentials: true,
           }
@@ -90,7 +81,7 @@ const PageCreator = () => {
         setCanAdd(response.data.result);
       } catch (error) {
         console.error("Error checking custom UID:", error);
-      } finally {
+      }finally{
         setDebounceLoader(false);
       }
     };
@@ -98,27 +89,40 @@ const PageCreator = () => {
     fetchCustomUIDAvailability();
   }, [debounceValue]);
 
+  const { toast } = useToast();
+
+  const { id } = useParams();
+
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+    if(!canAdd) {
+      toast({
+        title: "Custom UID is already taken"
+      });
+      return;
+    }
     try {
       await axios
         .post<{ msg: string }>(
-          `${import.meta.env.VITE_BACKEND_API}/pages/createPage`,
+          `${import.meta.env.VITE_BACKEND_API}/generateUrl`,
           {
             description: data.description,
-            customUID: data.customUID,
-            password: data.password,
+            customised_url_name: data.customUID,
+            url: data.url,
+            pageUID: id,
           },
           {
             withCredentials: true,
           }
         )
         .then((response) => {
+          console.log(response.data);
           toast({
             title: response.data.msg,
           });
           setRerender((e) => e + 1);
         });
     } catch (err: any) {
+      console.log(err.response.data);
       toast({
         title: err.response.data.msg,
       });
@@ -130,12 +134,12 @@ const PageCreator = () => {
       <div className="w-full flex justify-center">
         <Form {...form}>
           <form
-            onSubmit={(e) => {
+             onSubmit={(e) => {
               if (!canAdd) {
-                e.preventDefault();
+                e.preventDefault(); 
                 return;
               }
-              form.handleSubmit(onSubmit)(e);
+              form.handleSubmit(onSubmit)(e); 
             }}
             className="rounded-lg p-6 mt-16 mx-2 sm:mx-32 md:mx-48  max-w-[850px]"
           >
@@ -145,11 +149,29 @@ const PageCreator = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-white text-md  sm:text-lg md:text-2xl font-semibold h-fit">
-                    Create New Page
+                    Add A URL
                   </FormLabel>
                   <FormControl className="mt-4">
                     <Input
-                      placeholder="What this page is about?"
+                      placeholder="Add a description for this url"
+                      className="bg-white text-black p-4 md:p-6 text-sm sm:text-base md:text-lg"
+                      {...field}
+                    />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl className="mt-4">
+                    <Input
+                      placeholder="Enter the url"
                       className="bg-white text-black p-4 md:p-6 text-sm sm:text-base md:text-lg"
                       {...field}
                     />
@@ -193,12 +215,7 @@ const PageCreator = () => {
                             className="bg-white text-black p-4 pr-10  md:p-6 md:pr-10 text-sm sm:text-base md:text-lg"
                             {...field}
                           />
-                          {debounceLoader && (
-                            <Spinner
-                              className="absolute right-1 top-2 md:top-3 text-[#3a1d87]"
-                              size="small"
-                            />
-                          )}
+                          {debounceLoader &&<Spinner className="absolute right-1 top-2 md:top-3 text-[#3a1d87]" size="small" />}
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -207,40 +224,19 @@ const PageCreator = () => {
                 />
               </div>
             </div>
-
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl className="mt-4">
-                    <Input
-                      type="password"
-                      placeholder="Enter a password (optional)"
-                      className="bg-white text-black p-4 md:p-6 mt-4 text-sm sm:text-base md:text-lg"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormDescription className="text-[#cc1b6c] mt-2 mb-2 text-sm md:text-base">
               *If no custom UID is provided, an automated UID will be assigned.
             </FormDescription>
-            <CustomTooltip
-              message={canAdd ? "Create Page" : "PageUID is already taken"}
+            <CustomTooltip message={canAdd ? "Add Url" : "UID is already taken"}>
+            <Button
+              disabled={canAdd ? false : true}
+              className={`mt-2 bg-white hover:bg-gray-300 text-black text-sm sm:text-base md:text-lg md:h-12 md:w-18 ${canAdd ? "" : "cursor-not-allowed"}`}
+              type="submit"
             >
-              <Button
-                disabled={canAdd ? false : true}
-                className={`mt-2 bg-white hover:bg-gray-300 text-black text-sm sm:text-base md:text-lg md:h-12 md:w-18 ${
-                  canAdd ? "" : "cursor-not-allowed"
-                }`}
-                type="submit"
-              >
-                Create
-              </Button>
+              Add
+            </Button>
             </CustomTooltip>
+           
           </form>
         </Form>
       </div>
@@ -248,4 +244,4 @@ const PageCreator = () => {
   );
 };
 
-export default PageCreator;
+export default UrlAdder;

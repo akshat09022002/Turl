@@ -18,7 +18,6 @@ const DialogWindow = ({
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   children: React.ReactNode;
 }) => {
-  console.log(isOpen);
 
   return (
 

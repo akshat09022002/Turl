@@ -5,8 +5,8 @@ import type { CustomFlowbiteTheme } from "flowbite-react";
 import { Avatar } from "flowbite-react";
 import axios from "axios";
 import { toast } from "@/hooks/use-toast";
-import { useRecoilState } from "recoil";
-import { isSignedIn } from "@/store/atoms/atom";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import { isSignedIn, rerender } from "@/store/atoms/atom";
 import DialogWindowHome from "./DialogWindowHome";
 import Signin from "./Signin";
 import Signup from "./Signup";
@@ -22,6 +22,7 @@ export function DrawerMenu() {
   } | null>(null);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [customComponent, setCustomComponent] = useState<React.ReactNode>(null);
+  const setrerenderValue=useSetRecoilState(rerender);
   const navigation=useNavigate();
 
   const handleClose = () => setIsOpen(false);
@@ -35,7 +36,7 @@ export function DrawerMenu() {
   useEffect(() => {
     const userDetail = localStorage.getItem("user");
     setUserDetails(userDetail ? JSON.parse(userDetail) : null);
-  });
+  },[isLoggedIn]);
 
   return (
     <>
@@ -59,7 +60,7 @@ export function DrawerMenu() {
         onClose={handleClose}
         position="right"
       >
-        {/* <CardSpotlight className="h-full w-full rounded-none  m-0"> */}
+       
         <Drawer.Items>
           {isLoggedIn ? (
             <div className="flex flex-col ">
@@ -108,13 +109,12 @@ export function DrawerMenu() {
             {isLoggedIn ? (
               <>
                 <li className="py-4 sm:py-8" onClick={()=>{
-                  navigation('pages')
+                  navigation('/pages')
                 }}>My Pages</li>
                 <li className="py-4 sm:py-8">Settings</li>
                 <li
                   className="py-4 sm:py-8"
                   onClick={async () => {
-                    console.log("logout");
                     try {
                       await axios
                         .get<{ msg: string }>(
@@ -124,6 +124,7 @@ export function DrawerMenu() {
                           }
                         )
                         .then((response) => {
+                          setrerenderValue((e)=>e+1);
                           toast({
                             title: response.data.msg,
                           });
@@ -144,7 +145,7 @@ export function DrawerMenu() {
             ) : null}
           </ul>
         </DrawerItems>
-        {/* </CardSpotlight> */}
+        
       </Drawer>
     </>
   );

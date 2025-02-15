@@ -1,27 +1,16 @@
-import React, { useEffect, useState } from "react";
-import {
-  ArrowUp01,
-  ArrowUp10,
-  ArrowUpAZ,
-  ArrowUpDown,
-  ArrowUpZA,
-  Ellipsis,
-  FileDown,
-  Link,
-  Search
-} from "lucide-react";
+import React, { useState } from "react";
+import { Ellipsis, Link } from "lucide-react";
 import { motion } from "framer-motion";
-
 import {
-  ColumnDef,
+  type ColumnDef,
   getCoreRowModel,
   flexRender,
   useReactTable,
+  type ColumnFiltersState,
   getFilteredRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
-  ColumnFiltersState,
   SortingState,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 
 import {
@@ -40,42 +29,52 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-import DialogWindow from "./DialogWindow";
-import PasswordDialog from "./PasswordDialog";
-import EditDialog from "./EditDialog";
+import { FileDown } from "lucide-react";
 import axios from "axios";
-import { useRecoilState } from "recoil";
-import { rerender } from "@/store/atoms/atom";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { rerenderPage, urlsStateFamily } from "@/store/atoms/atom";
 import { toast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import DialogWindow from "../Pages/DialogWindow";
+import EditDialogUrlPage from "./EditDialogUrlPage";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { exportToExcel } from "@/controlFunctions/exportToXLSI";
 import CustomTooltip from "../common/CustomTooltip";
 import { Spinner } from "../ui/spinner";
-import { exportToExcelPage } from "@/controlFunctions/exportToXLSI";
+import {
+  ArrowUpDown,
+  ArrowUp01,
+  ArrowUp10,
+  ArrowUpAZ,
+  ArrowUpZA,
+  Search,
+} from "lucide-react";
 
 type urlType = {
-  description: string;
-  visitorCount: number;
-  pageUID: string;
   id: string;
-  password: string;
-  userId: string;
+  uid: string;
+  pageId: string;
+  description: string | null;
+  userId: string | null;
+  url: string;
+  visitorCount: number;
+  lastVisit: Date;
 };
 
-type urlResponse = {
-  msg: string;
-  Data: urlType[];
-};
-
-const Tablelist = () => {
+const PageTablelist = ({
+  pageId,
+  isOwner,
+}: {
+  pageId: string;
+  isOwner: boolean;
+}) => {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [customComponent, setCustomComponent] = useState<React.ReactNode>(null);
-  const [data, setData] = useState<urlType[]>([]);
+  const data = useRecoilValue(urlsStateFamily(pageId)).urls;
+  const password = useRecoilValue(urlsStateFamily(pageId)).password;
   const [title, setTitle] = useState<string>("");
   const [csvLoading, setCsvLoading] = useState(false);
-  const [rerenderValue, setrerenderValue] = useRecoilState(rerender);
+  const setrerender = useSetRecoilState(rerenderPage);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -87,13 +86,12 @@ const Tablelist = () => {
   const [visitorSortingLogo, setVisitorSortingLogo] = useState<React.ReactNode>(
     <ArrowUpDown className="w-4 h-4 sm:w-6 sm:h-6 ml-1" />
   );
-  const navigator = useNavigate();
 
-  const handleDelete = async (pageUID: string) => {
+  const handleDelete = async (uid: string) => {
     try {
       await axios
         .delete<{ msg: string }>(
-          `${import.meta.env.VITE_BACKEND_API}/pages/deleteUrl/${pageUID}`,
+          `${import.meta.env.VITE_BACKEND_API}/deleteUrl/${uid}`,
           {
             withCredentials: true,
           }
@@ -102,7 +100,7 @@ const Tablelist = () => {
           toast({
             title: response.data.msg,
           });
-          setrerenderValue((e) => e + 1);
+          setrerender((e) => e + 1);
         });
     } catch (err: any) {
       toast({
@@ -151,12 +149,21 @@ const Tablelist = () => {
       },
     },
     {
-      accessorKey: "pageUID",
+      accessorKey: "uid",
       header: "Link",
       cell: ({ row }) => {
         return (
           <div className="w-full flex justify-center">
-            <a href={`/pg/${row.getValue("pageUID")}`} target="_blank">
+            <a
+              href={`${import.meta.env.VITE_BACKEND_API}/${row.getValue(
+                "uid"
+              )}`}
+              onClick={() => {
+                setrerender((e) => e + 1);
+              }}
+              target="_blank"
+              rel="noreferrer"
+            >
               <Link className="w-4  h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 hover:brightness-200" />
             </a>
           </div>
@@ -210,7 +217,7 @@ const Tablelist = () => {
       cell: ({ row }) => {
         const rowData = row.original;
         const rowId = rowData.id;
-        const rowUID = rowData.pageUID;
+        const rowLastVisit = new Date(rowData.lastVisit);
         return (
           <div className="w-full flex justify-center">
             <DropdownMenu>
@@ -219,53 +226,34 @@ const Tablelist = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-4 sm:w-44 md:w-56">
                 <DropdownMenuLabel className="text-xs md:text-sm">
-                  Password: current password
+                  Last Visited: {rowLastVisit.toLocaleDateString("en-GB")}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-
                 <DropdownMenuItem
+                  disabled={!isOwner}
                   onClick={() => {
-                    if (!openDialog) {
-                      setOpenDialog(true);
-                      setCustomComponent(
-                        <PasswordDialog
-                          rowId={rowId}
-                          setOpenDialog={setOpenDialog}
-                        />
-                      );
-                      setTitle("Change Password");
-                    }
-                  }}
-                  className="text-xs md:text-sm"
-                >
-                  Change Password
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  onClick={() => {
-                    if (!openDialog) {
-                      setOpenDialog(true);
-                      setCustomComponent(
-                        <EditDialog
-                          rowId={rowId}
-                          setOpenDialog={setOpenDialog}
-                        />
-                      );
-                      setTitle("Edit Description");
-                    }
+                    setCustomComponent(
+                      <EditDialogUrlPage
+                        setOpenDialog={setOpenDialog}
+                        rowId={rowId}
+                      />
+                    );
+                    setOpenDialog(true);
                   }}
                   className="text-xs md:text-sm"
                 >
                   Edit
                 </DropdownMenuItem>
-
-                <DropdownMenuItem className="text-xs md:text-sm">
-                  Share
-                </DropdownMenuItem>
-
                 <DropdownMenuItem
                   className="text-xs md:text-sm"
-                  onClick={() => handleDelete(rowUID)}
+                  disabled={!isOwner}
+                >
+                  Share
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={!isOwner}
+                  className="text-xs md:text-sm"
+                  onClick={() => handleDelete(rowId)}
                 >
                   Delete
                 </DropdownMenuItem>
@@ -277,29 +265,7 @@ const Tablelist = () => {
     },
   ];
 
-  const getpages = async () => {
-    try {
-      await axios
-        .get<urlResponse>(
-          `${import.meta.env.VITE_BACKEND_API}/pages/getPages`,
-          {
-            withCredentials: true,
-          }
-        )
-        .then((response) => {
-          setData(response.data.Data);
-        });
-    } catch (err: any) {
-      setData([]);
-      navigator("/");
-    }
-  };
-
-  useEffect(() => {
-    getpages();
-  }, [rerenderValue]);
-
-  const table = useReactTable<urlType>({
+  const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -326,21 +292,19 @@ const Tablelist = () => {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      className="font-extrabold text-white text-center  p-4 max-w-4 sm:max-w-8 text-sm sm:text-lg md:text-xl "
-                      key={header.id}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    className="font-extrabold text-white text-center p-4 max-w-4 sm:max-w-8 text-sm sm:text-lg md:text-xl"
+                    key={header.id}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -358,7 +322,7 @@ const Tablelist = () => {
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
-                      className="py-4 px-4 font-semibold text-xs sm:text-base md:text-lg max-w-4 sm:max-w-8  overflow-y-auto no-scrollbar"
+                      className="py-4 px-4 font-semibold text-xs sm:text-base md:text-lg max-w-4 sm:max-w-8 overflow-y-auto no-scrollbar"
                       key={cell.id}
                     >
                       {flexRender(
@@ -384,16 +348,14 @@ const Tablelist = () => {
       </>
     );
   };
-
   return (
     <>
       <DialogWindow
+        dialogTitle={title}
         isOpen={openDialog}
         setIsOpen={setOpenDialog}
-        dialogTitle={title}
-      >
-        {customComponent}
-      </DialogWindow>
+        children={customComponent}
+      ></DialogWindow>
       <div className="relative flex items-center py-4 mt-12 mx-6 sm:mx-10 md:mt-24">
         <Search className="absolute hover:text-[#3a1d87] hover:brightness-200 h-4 w-4 sm:h-6 sm:w-6 left-1" />
         <Input
@@ -416,7 +378,7 @@ const Tablelist = () => {
               onClick={async () => {
                 if (data.length > 0) {
                   setCsvLoading(true);
-                  await exportToExcelPage(data);
+                  await exportToExcel(data, password, pageId);
                   setCsvLoading(false);
                 } else {
                   toast({
@@ -430,31 +392,31 @@ const Tablelist = () => {
           </CustomTooltip>
         )}
       </div>
-      <div className="mx-4 sm:mx-8 shadow-2xl">
+      <div className="mx-4 sm:mx-8 shadow-2xl ">
         <Tables />
       </div>
       <div className="flex items-center justify-end space-x-2 py-4 mx-6 sm:mx-10 ">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-16 md:h-10 md:w-18 "
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="h-8 w-16 md:h-10 md:w-18"
-          >
-            Next
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          className="h-8 w-16 md:h-10 md:w-18 "
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          className="h-8 w-16 md:h-10 md:w-18"
+        >
+          Next
+        </Button>
+      </div>
     </>
   );
 };
 
-export default Tablelist;
+export default PageTablelist;

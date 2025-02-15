@@ -3,7 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { useSetRecoilState } from "recoil";
-import { isSignedIn } from "@/store/atoms/atom";
+import { isSignedIn, rerender } from "@/store/atoms/atom";
 
 function Signin({
   setSigninClose,
@@ -14,6 +14,7 @@ function Signin({
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const setLoggedIn = useSetRecoilState(isSignedIn);
+  const setrerenderValue= useSetRecoilState(rerender);
 
   const submitHandler = async () => {
     try {
@@ -51,6 +52,8 @@ function Signin({
       toast({
         title: err.response.data.msg,
       });
+    }finally{
+      setrerenderValue((e)=>e+1);
     }
   };
 
