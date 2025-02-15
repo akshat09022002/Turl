@@ -7,10 +7,13 @@ import Signup from "./Signup";
 import DialogWindowHome from "./DialogWindowHome";
 import { useRecoilState } from "recoil";
 import { isSignedIn } from "@/store/atoms/atom";
+import {useNavigate} from 'react-router-dom'
 
 const Navbar = () => {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [customComponent, setCustomComponent] = useState<React.ReactNode>(null);
+
+  const navigate = useNavigate();
 
   const time = useTime();
 
@@ -31,7 +34,9 @@ const Navbar = () => {
         {customComponent}
       </DialogWindowHome>
       <div className="flex flex-row justify-between text-white my-5">
-        <div className="flex flex-row text-white">
+        <div className="flex flex-row text-white"
+         onClick={() => navigate('/')}
+        >
           <motion.div
             className="w-8 h-8 mt-2 bg-white rounded-lg ml-5 sm:w-10 sm:h-10 "
             style={{ rotate }}

@@ -81,7 +81,7 @@ const UrlAdder = () => {
         setCanAdd(response.data.result);
       } catch (error) {
         console.error("Error checking custom UID:", error);
-      }finally{
+      } finally {
         setDebounceLoader(false);
       }
     };
@@ -94,9 +94,9 @@ const UrlAdder = () => {
   const { id } = useParams();
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    if(!canAdd) {
+    if (!canAdd) {
       toast({
-        title: "Custom UID is already taken"
+        title: "Custom UID is already taken",
       });
       return;
     }
@@ -126,6 +126,10 @@ const UrlAdder = () => {
       toast({
         title: err.response.data.msg,
       });
+    } finally {
+      form.reset();
+      setCanAdd(true);
+      debounceState("");
     }
   }
 
@@ -134,12 +138,12 @@ const UrlAdder = () => {
       <div className="w-full flex justify-center">
         <Form {...form}>
           <form
-             onSubmit={(e) => {
+            onSubmit={(e) => {
               if (!canAdd) {
-                e.preventDefault(); 
+                e.preventDefault();
                 return;
               }
-              form.handleSubmit(onSubmit)(e); 
+              form.handleSubmit(onSubmit)(e);
             }}
             className="rounded-lg p-6 mt-16 mx-2 sm:mx-32 md:mx-48  max-w-[850px]"
           >
@@ -215,7 +219,12 @@ const UrlAdder = () => {
                             className="bg-white text-black p-4 pr-10  md:p-6 md:pr-10 text-sm sm:text-base md:text-lg"
                             {...field}
                           />
-                          {debounceLoader &&<Spinner className="absolute right-1 top-2 md:top-3 text-[#3a1d87]" size="small" />}
+                          {debounceLoader && (
+                            <Spinner
+                              className="absolute right-1 top-2 md:top-3 text-[#3a1d87]"
+                              size="small"
+                            />
+                          )}
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -227,16 +236,19 @@ const UrlAdder = () => {
             <FormDescription className="text-[#cc1b6c] mt-2 mb-2 text-sm md:text-base">
               *If no custom UID is provided, an automated UID will be assigned.
             </FormDescription>
-            <CustomTooltip message={canAdd ? "Add Url" : "UID is already taken"}>
-            <Button
-              disabled={canAdd ? false : true}
-              className={`mt-2 bg-white hover:bg-gray-300 text-black text-sm sm:text-base md:text-lg md:h-12 md:w-18 ${canAdd ? "" : "cursor-not-allowed"}`}
-              type="submit"
+            <CustomTooltip
+              message={canAdd ? "Add Url" : "UID is already taken"}
             >
-              Add
-            </Button>
+              <Button
+                disabled={canAdd ? false : true}
+                className={`mt-2 bg-white hover:bg-gray-300 text-black text-sm sm:text-base md:text-lg md:h-12 md:w-18 ${
+                  canAdd ? "" : "cursor-not-allowed"
+                }`}
+                type="submit"
+              >
+                Add
+              </Button>
             </CustomTooltip>
-           
           </form>
         </Form>
       </div>

@@ -122,6 +122,10 @@ const PageCreator = () => {
       toast({
         title: err.response.data.msg,
       });
+    } finally {
+      form.reset();
+      setCanAdd(true);
+      debounceState("");
     }
   }
 
