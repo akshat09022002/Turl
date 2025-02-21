@@ -11,24 +11,31 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormDescription,
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "@/hooks/use-toast";
+import axios from "axios";
+import { useDebounceValue } from "usehooks-ts";
+import CustomTooltip from "../common/CustomTooltip";
+import { Spinner } from "../ui/spinner";
+import { isSignedIn } from "@/store/atoms/atom";
+import { useRecoilValue } from "recoil";
 
 const formSchema = z.object({
   initialUrl: z.string(),
   customUID: z
     .string()
-    .min(5, {
-      message: "this should be deleted",
+    .min(1, {
+      message: "customUID should have min 1 character",
     })
     .max(50, {
       message: "customUID should have max 50 characters",
     })
-    .regex(/^[a-zA-Z0-9]+$/, "Custom UID can only contain letters and numbers.")
-    .or(z.literal("")),
+    .regex(
+      /^[a-zA-Z0-9]+$/,
+      "Custom UID can only contain letters and numbers."
+    ),
 });
 
 const UrlResult = ({
@@ -39,6 +46,7 @@ const UrlResult = ({
   setUrlResult: React.Dispatch<SetStateAction<string>>;
 }) => {
   const [pauseTimer, setPauseTimer] = useState(false);
+  const loggedIn = useRecoilValue(isSignedIn);
 
   const handleFocus = () => {
     setPauseTimer((e) => {
@@ -77,8 +85,44 @@ const UrlResult = ({
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    
+  const customUID = form.watch("customUID");
+  const [debounceValue, debounceState] = useDebounceValue(customUID, 300);
+  const [debounceLoader, setDebounceLoader] = useState(false);
+  const [canAdd, setCanAdd] = useState(true);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!canAdd) {
+      toast({
+        title: "Custom UID is already taken",
+      });
+      return;
+    }
+    try {
+      await axios
+        .post<{ msg: string }>(
+          `${import.meta.env.VITE_BACKEND_API}/customiseUrl`,
+          {
+            url: values.initialUrl,
+            customUID: values.customUID,
+          },
+          {
+            withCredentials: true,
+          }
+        )
+        .then((response) => {
+          toast({
+            title: response.data.msg,
+          });
+          const backend_api = import.meta.env.VITE_BACKEND_API.split("/");
+          const newUrl = `${backend_api[2]}/${values.customUID}`;
+          setUrlResult(newUrl);
+          debounceState("");
+        });
+    } catch (err: any) {
+      toast({
+        title: err.response.data.msg,
+      });
+    }
   }
 
   const { reset } = form;
@@ -86,6 +130,30 @@ const UrlResult = ({
   useEffect(() => {
     reset({ initialUrl: urlResult, customUID: "" });
   }, [urlResult]);
+
+  useEffect(() => {
+    if (!debounceValue) return;
+
+    const fetchCustomUIDAvailability = async () => {
+      setCanAdd(false);
+      setDebounceLoader(true);
+      try {
+        const response = await axios.post<{ result: boolean }>(
+          `${import.meta.env.VITE_BACKEND_API}/isValidUID/${debounceValue}`,
+          {
+            withCredentials: true,
+          }
+        );
+
+        setCanAdd(response.data.result);
+      } catch (error) {
+        console.error("Error checking custom UID:", error);
+      } finally {
+        setDebounceLoader(false);
+      }
+    };
+    fetchCustomUIDAvailability();
+  }, [debounceValue]);
 
   return (
     <>
@@ -101,7 +169,16 @@ const UrlResult = ({
           </div>
 
           <Form {...form}>
-            <form className="w-full" onSubmit={form.handleSubmit(onSubmit)}>
+            <form
+              className="w-full"
+              onSubmit={(e) => {
+                if (!canAdd || !loggedIn) {
+                  e.preventDefault();
+                  return;
+                }
+                form.handleSubmit(onSubmit)(e);
+              }}
+            >
               <div className="flex w-full gap-2">
                 <FormField
                   control={form.control}
@@ -137,13 +214,22 @@ const UrlResult = ({
                 render={({ field }) => (
                   <FormItem className="mb-4 sm:w-3/4">
                     <FormControl>
-                      <Input
-                        className="bg-white text-black text-xs sm:text-sm md:text-base p-2"
-                        placeholder="Enter a custom UID"
-                        onFocus={handleFocus}
-                        {...field}
-                        onBlur={handleFocus}
-                      />
+                      <div className="relative">
+                        <Input
+                          className="bg-white text-black text-xs sm:text-sm md:text-base p-2 pr-8"
+                          placeholder="Enter a custom UID"
+                          disabled={!loggedIn}
+                          onFocus={handleFocus}
+                          {...field}
+                          onBlur={handleFocus}
+                        />
+                        {debounceLoader && (
+                          <Spinner
+                            className="absolute right-1 top-1.5 text-[#3a1d87]"
+                            size="small"
+                          />
+                        )}
+                      </div>
                     </FormControl>
                     <FormMessage className="text-xs mt-2" />
                   </FormItem>
@@ -153,12 +239,23 @@ const UrlResult = ({
                 *You can always access your URLs in the "My URLs" section of the
                 menu.
               </FormDescription>
-              <Button
-                type="submit"
-                className="bg-[#cc1b6c] text-white text-sm sm:text-base md:p-6 hover:bg-blue-500"
+              <CustomTooltip
+                message={
+                  loggedIn
+                    ? canAdd
+                      ? "Customise URL"
+                      : "UID is already taken"
+                    : "Please login to customise URL"
+                }
               >
-                Customise
-              </Button>
+                <Button
+                  type="submit"
+                  disabled={!loggedIn || !canAdd}
+                  className="bg-[#cc1b6c] text-white text-sm sm:text-base md:p-6 hover:bg-blue-500"
+                >
+                  Customise
+                </Button>
+              </CustomTooltip>
             </form>
           </Form>
         </div>

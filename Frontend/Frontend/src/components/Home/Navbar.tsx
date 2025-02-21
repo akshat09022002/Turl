@@ -7,7 +7,7 @@ import Signup from "./Signup";
 import DialogWindowHome from "./DialogWindowHome";
 import { useRecoilState } from "recoil";
 import { isSignedIn } from "@/store/atoms/atom";
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
@@ -22,7 +22,6 @@ const Navbar = () => {
   const [isLoggedIn, setLoggedIn] = useRecoilState(isSignedIn);
 
   useEffect(() => {
-    console.log("setting");
     const userDetails = localStorage.getItem("user");
     if (userDetails) setLoggedIn(true);
     else setLoggedIn(false);
@@ -34,8 +33,9 @@ const Navbar = () => {
         {customComponent}
       </DialogWindowHome>
       <div className="flex flex-row justify-between text-white my-5">
-        <div className="flex flex-row text-white"
-         onClick={() => navigate('/')}
+        <div
+          className="flex flex-row text-white hover:cursor-pointer"
+          onClick={() => navigate("/")}
         >
           <motion.div
             className="w-8 h-8 mt-2 bg-white rounded-lg ml-5 sm:w-10 sm:h-10 "
@@ -69,7 +69,7 @@ const Navbar = () => {
                     <Signin setSigninClose={setIsOpenDialog} />
                   );
                 }}
-                className="hidden sm:block text-white bg-[#3f2097] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg text-xs py-0.5 px-4 sm:text-sm sm:px-4 sm:py-2 sm:w-1/6 sm:bottom-2.5"
+                className=" text-white mr-2 sm:mr-4 bg-[#3f2097] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg text-xs py-0.5 px-4 w-20 sm:text-sm sm:px-4 sm:py-2 sm:w-1/6 sm:bottom-2.5"
               >
                 Sign in
               </button>
@@ -80,7 +80,7 @@ const Navbar = () => {
                     <Signup setSignupClose={setIsOpenDialog} />
                   );
                 }}
-                className="hidden sm:block sm:text-white bg-[#c70074] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg sm:bottom-2.5 sm:text-sm sm:px-4 sm:mx-4 sm:py-2 sm:w-1/6"
+                className="text-white bg-[#c70074] hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-white font-medium rounded-lg text-xs py-0.5 px-4 w-20 sm:text-sm sm:px-4 sm:py-2 sm:w-1/6 sm:bottom-2.5"
               >
                 Sign up
               </button>

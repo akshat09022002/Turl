@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Copy, Ellipsis, Link } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Ellipsis } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   type ColumnDef,
@@ -31,33 +31,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FileDown } from "lucide-react";
 import axios from "axios";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { rerenderPage, tableLoader, urlsStateFamily } from "@/store/atoms/atom";
+import { useRecoilState } from "recoil";
+import { rerenderUrlPage } from "@/store/atoms/atom";
 import { toast } from "@/hooks/use-toast";
-import DialogWindow from "../Pages/DialogWindow";
-import EditDialogUrlPage from "./EditDialogUrlPage";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { exportToExcel } from "@/controlFunctions/exportToXLSI";
-import CustomTooltip from "../common/CustomTooltip";
-import { Spinner } from "../ui/spinner";
-import {
-  ArrowUpDown,
-  ArrowUp01,
-  ArrowUp10,
-  ArrowUpAZ,
-  ArrowUpZA,
-  Search,
-} from "lucide-react";
+import { exportToExcelMyUrls } from "@/controlFunctions/exportToXLSI";
+import CustomTooltip from "../components/common/CustomTooltip";
+import { Spinner } from "../components/ui/spinner";
+import { ArrowUpDown, ArrowUp01, ArrowUp10, Search } from "lucide-react";
+import Navbar from "@/components/Home/Navbar";
+import XLogo from "../assets/twitter.png";
+import LinkedInLogo from "../assets/linkedin.png";
+import { Copy } from "lucide-react";
 import {
   DropdownMenuPortal,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@radix-ui/react-dropdown-menu";
-import XLogo from "../../assets/twitter.png";
-import LinkedInLogo from "../../assets/linkedin.png";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type urlType = {
   id: string;
@@ -70,31 +63,20 @@ type urlType = {
   lastVisit: Date;
 };
 
-const PageTablelist = ({
-  pageId,
-  isOwner,
-}: {
-  pageId: string;
-  isOwner: boolean;
-}) => {
-  const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [customComponent, setCustomComponent] = useState<React.ReactNode>(null);
-  const data = useRecoilValue(urlsStateFamily(pageId)).urls;
-  const password = useRecoilValue(urlsStateFamily(pageId)).password;
-  const [csvLoading, setCsvLoading] = useState(false);
-  const setrerender = useSetRecoilState(rerenderPage);
+const MyUrls = () => {
+  const [data, setData] = useState<urlType[]>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const [urlLoader,setUrlLoader]= useState(false);
+  const [csvLoading, setCsvLoading] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [descriptionSortingLogo, setDescriptionSortingLogo] =
-    useState<React.ReactNode>(
-      <ArrowUpDown className="w-4 h-4 sm:w-6 sm:h-6 ml-1" />
-    );
   const [visitorSortingLogo, setVisitorSortingLogo] = useState<React.ReactNode>(
     <ArrowUpDown className="w-4 h-4 sm:w-6 sm:h-6 ml-1" />
   );
-  const pageLoading = useRecoilValue(tableLoader);
+  const [renderUrls, setRerender] = useRecoilState(rerenderUrlPage);
+  const [firstRender, setFirstRender] = useState(true);
+
 
   const handleDelete = async (uid: string) => {
     try {
@@ -109,7 +91,7 @@ const PageTablelist = ({
           toast({
             title: response.data.msg,
           });
-          setrerender((e) => e + 1);
+          setRerender((e) => e + 1);
         });
     } catch (err: any) {
       toast({
@@ -120,62 +102,27 @@ const PageTablelist = ({
 
   const columns: ColumnDef<urlType>[] = [
     {
-      accessorKey: "description",
-      header: ({ column }) => {
+      accessorKey: "uid",
+      header: () => {
         return (
-          <div
-            onClick={() => {
-              const isSorted = column.getIsSorted();
-              setVisitorSortingLogo(
-                <ArrowUpDown className="w-4 h-4 sm:w-6 sm:h-6 ml-1" />
-              );
-              if (isSorted === "desc") {
-                column.toggleSorting(false); // Set to "desc" first
-                setDescriptionSortingLogo(
-                  <ArrowUpAZ className="w-4 h-4 sm:w-6 sm:h-6 ml-1" />
-                );
-              } else if (isSorted === "asc") {
-                column.clearSorting(); // Remove sorting (unsorted)
-                setDescriptionSortingLogo(
-                  <ArrowUpDown className="w-4 h-4 sm:w-6 sm:h-6 ml-1" />
-                );
-              } else {
-                column.toggleSorting(true); // Switch to "asc"
-                setDescriptionSortingLogo(
-                  <ArrowUpZA className="w-4 h-4 sm:w-6 sm:h-6 ml-1" />
-                );
-              }
-            }}
-            className="flex flex-col pl-4 items-center hover:cursor-pointer sm:flex-row sm:pl-0"
-          >
-            Description
-            {descriptionSortingLogo}
+          <div className="pl-4 items-center hover:cursor-pointer sm:flex-row sm:pl-0">
+            Link
           </div>
         );
       },
       cell: ({ row }) => {
-        return <span className="truncate">{row.getValue("description")}</span>;
-      },
-    },
-    {
-      accessorKey: "uid",
-      header: "Link",
-      cell: ({ row }) => {
         return (
-          <div className="w-full flex justify-center">
-            <a
-              href={`${import.meta.env.VITE_BACKEND_API}/${row.getValue(
-                "uid"
-              )}`}
-              onClick={() => {
-                setrerender((e) => e + 1);
-              }}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Link className="w-4  h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 hover:brightness-200" />
-            </a>
-          </div>
+          <a
+            href={`${import.meta.env.VITE_BACKEND_API}/${row.getValue("uid")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="truncate hover:underline"
+            onClick={() => {
+              setRerender((e) => e + 1);
+            }}
+          >
+            {`${import.meta.env.VITE_BACKEND_API}/${row.getValue("uid")}`}
+          </a>
         );
       },
     },
@@ -186,9 +133,6 @@ const PageTablelist = ({
           <div
             onClick={() => {
               const isSorted = column.getIsSorted();
-              setDescriptionSortingLogo(
-                <ArrowUpDown className="w-4 h-4 sm:w-6 sm:h-6 ml-1" />
-              );
               if (isSorted === "desc") {
                 column.toggleSorting(false); // Set to "desc" first
                 setVisitorSortingLogo(
@@ -248,23 +192,8 @@ const PageTablelist = ({
                   Last Visited: {rowLastVisit.toLocaleDateString("en-GB")}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  disabled={!isOwner}
-                  onClick={() => {
-                    setCustomComponent(
-                      <EditDialogUrlPage
-                        setOpenDialog={setOpenDialog}
-                        rowId={rowId}
-                      />
-                    );
-                    setOpenDialog(true);
-                  }}
-                  className="text-xs md:text-sm"
-                >
-                  Edit
-                </DropdownMenuItem>
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="text-xs md:text-sm outline-none ml-2">
+                  <DropdownMenuSubTrigger className="text-xs md:text-sm ml-2">
                     Share
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>
@@ -318,7 +247,6 @@ const PageTablelist = ({
                   </DropdownMenuPortal>
                 </DropdownMenuSub>
                 <DropdownMenuItem
-                  disabled={!isOwner}
                   className="text-xs md:text-sm"
                   onClick={() => handleDelete(rowId)}
                 >
@@ -351,6 +279,36 @@ const PageTablelist = ({
       },
     },
   });
+
+  const getUrls = async () => {
+    setUrlLoader(true);
+    try {
+      await axios
+        .get<{ msg: string; urls: urlType[] }>(
+          `${import.meta.env.VITE_BACKEND_API}/getUrls`,
+          { withCredentials: true }
+        )
+        .then((response) => {
+          setData(response.data.urls);
+          {
+            firstRender &&
+              toast({
+                title: response.data.msg,
+              });
+          }
+          setFirstRender(false);
+          setUrlLoader(false);
+        });
+    } catch (err: any) {
+      toast({
+        title: err.response.data.msg,
+      });
+    }
+  };
+
+  useEffect(() => {
+    getUrls();
+  }, [renderUrls]);
 
   const renderSkeletonRows = () => {
     const skeletonRows = Array(3).fill(null); // 3 skeleton rows
@@ -398,45 +356,45 @@ const PageTablelist = ({
               </TableRow>
             ))}
           </TableHeader>
-          {pageLoading ? (
-            <TableBody>{renderSkeletonRows()}</TableBody>
-          ) : (
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <motion.tr
-                    key={row.id}
-                    whileHover={{
-                      scale: 1.008,
-                      transition: { duration: 0.2 },
-                    }}
-                    className="border-y-[1px] border-white hover:bg-[#3a1d87]"
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        className="py-4 px-4 font-semibold text-xs sm:text-base md:text-lg max-w-4 sm:max-w-8 overflow-y-auto no-scrollbar"
-                        key={cell.id}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </motion.tr>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No url found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
+          {urlLoader ? (<TableBody>
+            {renderSkeletonRows()}
+          </TableBody>) : (
+             <TableBody>
+             {table.getRowModel().rows?.length ? (
+               table.getRowModel().rows.map((row) => (
+                 <motion.tr
+                   key={row.id}
+                   whileHover={{
+                     scale: 1.008,
+                     transition: { duration: 0.2 },
+                   }}
+                   className="border-y-[1px] border-white hover:bg-[#3a1d87]"
+                   data-state={row.getIsSelected() && "selected"}
+                 >
+                   {row.getVisibleCells().map((cell) => (
+                     <TableCell
+                       className="py-4 px-4 font-semibold text-xs sm:text-base md:text-lg max-w-4 sm:max-w-8 overflow-y-auto no-scrollbar"
+                       key={cell.id}
+                     >
+                       {flexRender(
+                         cell.column.columnDef.cell,
+                         cell.getContext()
+                       )}
+                     </TableCell>
+                   ))}
+                 </motion.tr>
+               ))
+             ) : (
+               <TableRow>
+                 <TableCell
+                   colSpan={columns.length}
+                   className="h-24 text-center"
+                 >
+                   No URL's found.
+                 </TableCell>
+               </TableRow>
+             )}
+           </TableBody>
           )}
         </Table>
       </>
@@ -444,73 +402,62 @@ const PageTablelist = ({
   };
   return (
     <>
-      <DialogWindow
-        dialogTitle=""
-        isOpen={openDialog}
-        setIsOpen={setOpenDialog}
-        children={customComponent}
-      ></DialogWindow>
-      <div className="relative flex items-center py-4 mt-12 mx-6 sm:mx-10 md:mt-24">
-        <Search className="absolute hover:text-[#3a1d87] hover:brightness-200 h-4 w-4 sm:h-6 sm:w-6 left-1" />
-        <Input
-          placeholder="Filter descriptions..."
-          value={
-            (table.getColumn("description")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("description")?.setFilterValue(event.target.value)
-          }
-          className="w-3/5 bg-white text-sm max-w-[600px] p-4 px-6 sm:px-8 sm:text-base md:p-6 md:pl-8 md:text-lg"
-        />
-        {csvLoading ? (
-          <CustomTooltip message="Generating Excel...">
-            <Spinner className="text-white hover:text-[#3a1d87] hover:brightness-200 hover:scale-125 w-8 h-8 ml-2 sm:w-8 sm:h-8 sm:ml-6 md:w-10 md:h-10" />
-          </CustomTooltip>
-        ) : (
-          <CustomTooltip message="Export to Excel">
-            <FileDown
-              onClick={async () => {
-                if (data.length > 0) {
+      <div className="absolute inset-0 -z-10 min-h-screen h-fit items-center pb-24 [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]">
+        <Navbar />
+
+        <div className="relative flex items-center py-4 mt-12 mx-6 sm:mx-10 md:mt-24">
+          <Search className="absolute hover:text-[#3a1d87] hover:brightness-200 h-4 w-4 sm:h-6 sm:w-6 left-1" />
+          <Input
+            placeholder="Filter descriptions..."
+            value={(table.getColumn("uid")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("uid")?.setFilterValue(event.target.value)
+            }
+            className="w-3/5 bg-white text-sm max-w-[600px] p-4 px-6 sm:px-8 sm:text-base md:p-6 md:pl-8 md:text-lg"
+          />
+          {csvLoading ? (
+            <CustomTooltip message="Generating Excel...">
+              <Spinner className="text-white hover:text-[#3a1d87] hover:brightness-200 hover:scale-125 w-8 h-8 ml-2 sm:w-8 sm:h-8 sm:ml-6 md:w-10 md:h-10" />
+            </CustomTooltip>
+          ) : (
+            <CustomTooltip message="Export to Excel">
+              <FileDown
+                className="text-white hover:text-[#3a1d87] hover:brightness-200 hover:scale-125 w-8 h-8 ml-2 sm:w-8 sm:h-8 sm:ml-6 md:w-10 md:h-10"
+                onClick={async () => {
                   setCsvLoading(true);
-                  await exportToExcel(data, password, pageId);
+                  await exportToExcelMyUrls(data);
                   setCsvLoading(false);
-                } else {
-                  toast({
-                    title: "No data to export",
-                    description: "Please add data to export",
-                  });
-                }
-              }}
-              className="text-white hover:text-[#3a1d87] hover:brightness-200 hover:scale-125 w-8 h-8 ml-2 sm:w-8 sm:h-8 sm:ml-6 md:w-10 md:h-10"
-            />
-          </CustomTooltip>
-        )}
-      </div>
-      <div className="mx-4 sm:mx-8 shadow-2xl ">
-        <Tables />
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4 mx-6 sm:mx-10 ">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-          className="h-8 w-16 md:h-10 md:w-18 "
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-          className="h-8 w-16 md:h-10 md:w-18"
-        >
-          Next
-        </Button>
+                }}
+              />
+            </CustomTooltip>
+          )}
+        </div>
+        <div className="mx-4 sm:mx-8 shadow-2xl ">
+          <Tables />
+        </div>
+        <div className="flex items-center justify-end space-x-2 py-4 mx-6 sm:mx-10 ">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="h-8 w-16 md:h-10 md:w-18 "
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="h-8 w-16 md:h-10 md:w-18"
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </>
   );
 };
 
-export default PageTablelist;
+export default MyUrls;

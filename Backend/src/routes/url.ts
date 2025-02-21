@@ -1,5 +1,10 @@
 import express from "express";
-import { updateUrlDetail, updateUrlDetailType, urlDetail, urlDetailType } from "../schema";
+import {
+  updateUrlDetail,
+  updateUrlDetailType,
+  urlDetail,
+  urlDetailType,
+} from "../schema";
 import { PrismaClient } from "@prisma/client";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import cookieParser from "cookie-parser";
@@ -32,17 +37,51 @@ function generateRandomCode(): string {
   return code;
 }
 
+router.post("/customiseUrl", middleware, async (req, res) => {
+  try {
+    const { url, customUID }: { url: string; customUID: string } = req.body;
+    const uid = url.split("/")[1];
+
+    const response = await prisma.uRL.findUnique({
+      where: {
+        uid: customUID,
+      },
+    });
+
+    if (response) {
+      return res.status(400).json({
+        msg: "Custom UID already taken",
+      });
+    }
+
+    await prisma.uRL.update({
+      where: {
+        uid: uid,
+      },
+      data: {
+        uid: customUID,
+      },
+    });
+
+    return res.status(200).json({
+      msg: "Url updated successfully",
+    });
+  } catch (err) {
+    return res.status(200).json({
+      msg: "Record to update not found",
+    });
+  }
+});
+
 router.post("/generateUrl", async (req, res) => {
   try {
     const response: urlDetailType = req.body;
     const jwtuserId: string = req.cookies.token;
 
-    console.log(response);
-
     const isSuccess = urlDetail.safeParse(response);
     if (!isSuccess.success) {
       return res.status(403).json({
-        msg: "Invalid Input",
+        msg: "Input must be a valid URL",
       });
     }
 
@@ -51,8 +90,6 @@ router.post("/generateUrl", async (req, res) => {
         jwtuserId,
         JWT_SECRET
       ) as JwtPayload;
-
-      console.log(userId.userid);
 
       const isUserPresent = await prisma.user.findUnique({
         where: {
@@ -82,46 +119,50 @@ router.post("/generateUrl", async (req, res) => {
       };
 
       const UID = await generateUniqueCode();
-      console.log("UID", UID);
 
       if (response.pageUID) {
-        console.log("has pageUID", response.pageUID, userId.userid);
         const isOwner = await prisma.page.findUnique({
           where: {
             userId: userId.userid,
             pageUID: response.pageUID,
           },
+          select: {
+            urls: true,
+            userId: true,
+          },
         });
 
         if (isOwner) {
-          console.log("istheOwner");
-
-            const extractor = await prisma.uRL.create({
-              data: {
-                url: response.url,
-                uid: response.customised_url_name
-                  ? response.customised_url_name
-                  : UID,
-                description: response.description,
-                pageId: response.pageUID,
-                lastVisit: new Date(),
-                visitorCount: 0,
-                userId: userId.userid,
-              },
+          if (isOwner.urls.length === 50) {
+            return res.status(403).json({
+              msg: "You have reached the maximum limit of 50 urls per page",
             });
+          }
+
+          const extractor = await prisma.uRL.create({
+            data: {
+              url: response.url,
+              uid: response.customised_url_name
+                ? response.customised_url_name
+                : UID,
+              description: response.description,
+              pageId: response.pageUID,
+              lastVisit: new Date(),
+              visitorCount: 0,
+              userId: userId.userid,
+            },
+          });
 
           return res.status(200).json({
             short_url: "localhost:3000/" + UID,
-            msg:"Url generated successfully."
+            msg: "Url generated successfully.",
           });
         } else {
-          console.log("not the owner");
           return res.status(403).json({
             msg: "Invalid Page Ownership",
           });
         }
       } else {
-        console.log("no pg uid but signed in");
         const extractor = await prisma.uRL.create({
           data: {
             url: response.url,
@@ -139,11 +180,10 @@ router.post("/generateUrl", async (req, res) => {
         });
       }
     } else {
-      console.log("none");
-      if(response.pageUID){
+      if (response.pageUID) {
         return res.status(403).json({
-          msg:"Invalid Page Ownership"
-        })
+          msg: "Invalid Page Ownership",
+        });
       }
       const generateUniqueCode = async (): Promise<string> => {
         let uniqueCode: string;
@@ -181,87 +221,116 @@ router.post("/generateUrl", async (req, res) => {
   }
 });
 
-router.post('/isValidUID/*',async(req:any,res)=>{
-  
-  try{
-    const fullPath: string = req.params[0].split(',')[0];
-   
-    let result=true;
+router.post("/isValidUID/*", async (req: any, res) => {
+  try {
+    const fullPath: string = req.params[0].split(",")[0];
 
-    const response=await prisma.uRL.findUnique({
-      where:{
-        uid:fullPath
-      }
+    let result = true;
+
+    const response = await prisma.uRL.findUnique({
+      where: {
+        uid: fullPath,
+      },
     });
 
-    if(response) result=false;
-    
+    if (response) result = false;
 
     return res.status(200).json({
       result,
-    })
-  }catch(err){
-    res.status(500).json({
-      msg:"Internal Server Error"
-    })
+    });
+  } catch (err) {
+    return res.status(500).json({
+      msg: "Internal Server Error",
+    });
   }
 });
 
-router.post('/updateUrl',middleware, async(req:any , res)=>{
-  const updateDetails:updateUrlDetailType= req.body;
-  const userId=req.userId as string;
+router.post("/updateUrl", middleware, async (req: any, res) => {
+  const updateDetails: updateUrlDetailType = req.body;
+  const userId = req.userId as string;
 
-  const isSuccess= updateUrlDetail.safeParse(updateDetails);
-  if(!isSuccess.success){
+  const isSuccess = updateUrlDetail.safeParse(updateDetails);
+  if (!isSuccess.success) {
     return res.status(403).json({
-      msg:"Invalid Data"
-    })
+      msg: "Invalid Data",
+    });
   }
 
-  try{
-    const updated= await prisma.uRL.update({
-      where:{
-        id:updateDetails.id,
-        userId: userId 
+  try {
+    const updated = await prisma.uRL.update({
+      where: {
+        id: updateDetails.id,
+        userId: userId,
       },
-      data:{
-        description:updateDetails.description,
-      }
+      data: {
+        description: updateDetails.description,
+      },
     });
-  
-    console.log(updated);
+
     return res.status(200).json({
-      msg:'Url Updated Successfully'
+      msg: "Url Updated Successfully",
     });
-  }catch(err){
+  } catch (err) {
     return res.status(400).json({
-      msg:'Invalid Request'
+      msg: "Invalid Request",
     });
   }
-})
+});
 
-router.delete('/deleteUrl/*',middleware,async(req:any ,res)=>{
-  const userId=req.userId;
+router.delete("/deleteUrl/*", middleware, async (req: any, res) => {
+  const userId = req.userId;
   const fullPath: string = req.params[0];
-  
-  try{
-  await prisma.uRL.delete({
-    where:{
-      id:fullPath,
-      userId:userId,
-    }
-  })
 
-  res.status(200).json({
-    msg:'Url Deleted Successfully'
-  });
-}catch{
-  res.status(400).json({
-    msg:'Something Went Wrong'
-  });
-}
-  
-})
+  try {
+    await prisma.uRL.delete({
+      where: {
+        id: fullPath,
+        userId: userId,
+      },
+    });
+
+    return res.status(200).json({
+      msg: "Url Deleted Successfully",
+    });
+  } catch {
+    return res.status(500).json({
+      msg: "Something Went Wrong",
+    });
+  }
+});
+
+router.get("/getUrls", middleware, async (req: any, res) => {
+  try {
+    const userId = req.userId;
+    const urls = await prisma.uRL.findMany({
+      where: {
+        userId: userId,
+        pageId: null,
+      },
+      select: {
+        id: true,
+        url: true,
+        lastVisit: true,
+        visitorCount: true,
+        description: true,
+        uid: true,
+      },
+    });
+    if (urls.length === 0) {
+      return res.status(200).json({
+        msg: "No Urls Found",
+      });
+    }
+    return res.status(200).json({
+      msg: "Urls Fetched Successfully",
+      urls: urls,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      msg: "Something Went Wrong",
+    });
+  }
+});
 
 router.get("/*", async (req, res) => {
   const fullPath: string = JSON.parse(JSON.stringify(req.params))["0"];
@@ -293,7 +362,6 @@ router.get("/*", async (req, res) => {
       return res.status(200).redirect(finder.url);
     }
   } catch (err) {
-    console.log(err);
     return res.status(404).json({
       error: "Something went wrong",
     });

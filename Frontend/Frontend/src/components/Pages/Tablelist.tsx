@@ -5,13 +5,15 @@ import {
   ArrowUpAZ,
   ArrowUpDown,
   ArrowUpZA,
+  Copy,
   Ellipsis,
   FileDown,
   Link,
-  Search
+  Search,
 } from "lucide-react";
 import { motion } from "framer-motion";
-
+import XLogo from "../../assets/twitter.png";
+import LinkedInLogo from "../../assets/linkedin.png";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -23,7 +25,6 @@ import {
   ColumnFiltersState,
   SortingState,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -54,6 +55,13 @@ import { Input } from "../ui/input";
 import CustomTooltip from "../common/CustomTooltip";
 import { Spinner } from "../ui/spinner";
 import { exportToExcelPage } from "@/controlFunctions/exportToXLSI";
+import {
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+} from "@radix-ui/react-dropdown-menu";
+import { Skeleton } from "../ui/skeleton";
 
 type urlType = {
   description: string;
@@ -87,7 +95,9 @@ const Tablelist = () => {
   const [visitorSortingLogo, setVisitorSortingLogo] = useState<React.ReactNode>(
     <ArrowUpDown className="w-4 h-4 sm:w-6 sm:h-6 ml-1" />
   );
-  const navigator = useNavigate();
+  const [pageLoader, setPageLoader] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const handleDelete = async (pageUID: string) => {
     try {
@@ -211,6 +221,15 @@ const Tablelist = () => {
         const rowData = row.original;
         const rowId = rowData.id;
         const rowUID = rowData.pageUID;
+        const encodedURL = encodeURIComponent(
+          `${import.meta.env.VITE_FRONTEND_API}/pg/${rowData.pageUID}`
+        );
+        const shareText =
+          "This URL was generated using Turl, the ultimate URL shortener. Check it out!";
+        const socialLinks = {
+          linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedURL}`,
+          twitter: `https://twitter.com/intent/tweet?text=${shareText}&url=${encodedURL}`,
+        };
         return (
           <div className="w-full flex justify-center">
             <DropdownMenu>
@@ -259,9 +278,60 @@ const Tablelist = () => {
                   Edit
                 </DropdownMenuItem>
 
-                <DropdownMenuItem className="text-xs md:text-sm">
-                  Share
-                </DropdownMenuItem>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger className="text-xs md:text-sm ml-2">
+                    Share
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent className="bg-gray-200 z-50 rounded-md">
+                      <DropdownMenuItem>
+                        <span>
+                          <Copy
+                            onClick={() => {
+                              navigator.clipboard.writeText(
+                                `${import.meta.env.VITE_FRONTEND_API}/${
+                                  rowData.pageUID
+                                }`
+                              );
+                              toast({
+                                title: "Copied to clipboard!",
+                              });
+                            }}
+                            className="w-6 h-6 hover:cursor-pointer hover:scale-90"
+                          />
+                        </span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <span>
+                          <a
+                            href={socialLinks.twitter}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <img
+                              className="h-8 w-8 hover:cursor-pointer hover:scale-90"
+                              src={XLogo}
+                            />
+                          </a>
+                        </span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <span>
+                          <a
+                            href={socialLinks.linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <img
+                              className="h-8 w-8 hover:cursor-pointer hover:scale-90"
+                              src={LinkedInLogo}
+                            />
+                          </a>
+                        </span>
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
 
                 <DropdownMenuItem
                   className="text-xs md:text-sm"
@@ -278,6 +348,7 @@ const Tablelist = () => {
   ];
 
   const getpages = async () => {
+    setPageLoader(true);
     try {
       await axios
         .get<urlResponse>(
@@ -288,10 +359,11 @@ const Tablelist = () => {
         )
         .then((response) => {
           setData(response.data.Data);
+          setPageLoader(false);
         });
     } catch (err: any) {
       setData([]);
-      navigator("/");
+      navigate("/");
     }
   };
 
@@ -319,6 +391,29 @@ const Tablelist = () => {
     },
   });
 
+  const renderSkeletonRows = () => {
+    const skeletonRows = Array(3).fill(null); // 3 skeleton rows
+    return skeletonRows.map((_, rowIndex) => (
+      <motion.tr
+        key={`skeleton-row-${rowIndex}`}
+        whileHover={{
+          scale: 1.008,
+          transition: { duration: 0.2 },
+        }}
+        className="border-y-[1px] border-white hover:bg-[#3a1d87]"
+      >
+        {table.getHeaderGroups()[0].headers.map((header) => (
+          <TableCell
+            key={`skeleton-cell-${header.id}-${rowIndex}`}
+            className="py-4 px-4 font-semibold text-xs sm:text-base md:text-lg max-w-4 sm:max-w-8 overflow-y-auto no-scrollbar"
+          >
+            <Skeleton className="h-6 w-full bg-white/20" />
+          </TableCell>
+        ))}
+      </motion.tr>
+    ));
+  };
+
   const Tables = () => {
     return (
       <>
@@ -344,42 +439,46 @@ const Tablelist = () => {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <motion.tr
-                  key={row.id}
-                  whileHover={{
-                    scale: 1.008,
-                    transition: { duration: 0.2 },
-                  }}
-                  className="border-y-[1px] border-white hover:bg-[#3a1d87]"
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      className="py-4 px-4 font-semibold text-xs sm:text-base md:text-lg max-w-4 sm:max-w-8  overflow-y-auto no-scrollbar"
-                      key={cell.id}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </motion.tr>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
+          {pageLoader ? (
+            <TableBody>{renderSkeletonRows()}</TableBody>
+          ) : (
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <motion.tr
+                    key={row.id}
+                    whileHover={{
+                      scale: 1.008,
+                      transition: { duration: 0.2 },
+                    }}
+                    className="border-y-[1px] border-white hover:bg-[#3a1d87]"
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        className="py-4 px-4 font-semibold text-xs sm:text-base md:text-lg max-w-4 sm:max-w-8  overflow-y-auto no-scrollbar"
+                        key={cell.id}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </motion.tr>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No page found. Please add a page to view.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          )}
         </Table>
       </>
     );
@@ -434,25 +533,25 @@ const Tablelist = () => {
         <Tables />
       </div>
       <div className="flex items-center justify-end space-x-2 py-4 mx-6 sm:mx-10 ">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-16 md:h-10 md:w-18 "
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="h-8 w-16 md:h-10 md:w-18"
-          >
-            Next
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          className="h-8 w-16 md:h-10 md:w-18 "
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          className="h-8 w-16 md:h-10 md:w-18"
+        >
+          Next
+        </Button>
+      </div>
     </>
   );
 };

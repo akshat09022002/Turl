@@ -14,6 +14,7 @@ interface CustomRequest extends Request {
 export const middleware=(req:CustomRequest,res:Response,next:NextFunction)=>{
     try{
         const token=req.cookies.token;
+        
         if(!token){
             return res.status(401).json({
                 msg:"Unauthorized Access"
@@ -27,7 +28,7 @@ export const middleware=(req:CustomRequest,res:Response,next:NextFunction)=>{
         next();
 
     }catch(err:unknown){
-        res.status(200).json({
+        return res.status(200).json({
             msg:"Unauthorized Access"
         })
     }

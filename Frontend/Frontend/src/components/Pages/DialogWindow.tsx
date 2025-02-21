@@ -18,18 +18,15 @@ const DialogWindow = ({
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   children: React.ReactNode;
 }) => {
-
   return (
-
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="w-5/6">
-          <DialogHeader>
-            <DialogTitle>{dialogTitle}</DialogTitle>
-            {children}
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
- 
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="w-5/6">
+        <DialogHeader>
+          <DialogTitle>{dialogTitle}</DialogTitle>
+          {children}
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -22,8 +22,8 @@ import { rerenderPage } from "@/store/atoms/atom";
 import { useParams } from "react-router-dom";
 import { useDebounceValue } from "usehooks-ts";
 import { useEffect, useState } from "react";
-import { Spinner } from "../ui/spinner";
 import CustomTooltip from "../common/CustomTooltip";
+import { Spinner } from "../ui/spinner";
 
 const FormSchema = z.object({
   description: z.string().min(10, {
@@ -62,10 +62,9 @@ const UrlAdder = () => {
   const [debounceValue, debounceState] = useDebounceValue(customUID, 300);
   const [debounceLoader, setDebounceLoader] = useState(false);
   const [canAdd, setCanAdd] = useState(true);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (!debounceValue) return;
-
-    console.log("calling the api with", debounceValue);
 
     const fetchCustomUIDAvailability = async () => {
       setCanAdd(false);
@@ -77,7 +76,6 @@ const UrlAdder = () => {
             withCredentials: true,
           }
         );
-        console.log("API Response:", response.data.result);
         setCanAdd(response.data.result);
       } catch (error) {
         console.error("Error checking custom UID:", error);
@@ -94,6 +92,7 @@ const UrlAdder = () => {
   const { id } = useParams();
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+    setLoading(true);
     if (!canAdd) {
       toast({
         title: "Custom UID is already taken",
@@ -115,14 +114,12 @@ const UrlAdder = () => {
           }
         )
         .then((response) => {
-          console.log(response.data);
           toast({
             title: response.data.msg,
           });
           setRerender((e) => e + 1);
         });
     } catch (err: any) {
-      console.log(err.response.data);
       toast({
         title: err.response.data.msg,
       });
@@ -130,6 +127,7 @@ const UrlAdder = () => {
       form.reset();
       setCanAdd(true);
       debounceState("");
+      setLoading(false);
     }
   }
 
@@ -237,17 +235,27 @@ const UrlAdder = () => {
               *If no custom UID is provided, an automated UID will be assigned.
             </FormDescription>
             <CustomTooltip
-              message={canAdd ? "Add Url" : "UID is already taken"}
+              message={
+                loading
+                  ? "Adding Url"
+                  : canAdd
+                  ? "Add Url"
+                  : "UID is already taken"
+              }
             >
-              <Button
-                disabled={canAdd ? false : true}
-                className={`mt-2 bg-white hover:bg-gray-300 text-black text-sm sm:text-base md:text-lg md:h-12 md:w-18 ${
-                  canAdd ? "" : "cursor-not-allowed"
-                }`}
-                type="submit"
-              >
-                Add
-              </Button>
+              {loading ? (
+                <Spinner size="medium" className="text-white" />
+              ) : (
+                <Button
+                  disabled={canAdd ? false : true}
+                  className={`mt-2 bg-white hover:bg-gray-300 text-black text-sm sm:text-base md:text-lg md:h-12 md:w-18 ${
+                    canAdd ? "" : "cursor-not-allowed"
+                  }`}
+                  type="submit"
+                >
+                  Add
+                </Button>
+              )}
             </CustomTooltip>
           </form>
         </Form>

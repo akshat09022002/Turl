@@ -56,8 +56,23 @@ router.post("/createPage", middleware, async (req: any, res) => {
     const isSuccess = pageDetail.safeParse(pageDetails);
 
     if (!isSuccess.success) {
-      res.status(400).json({
+      return res.status(400).json({
         msg: "Invalid Data",
+      });
+    }
+
+    const userPages = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        pages: true,
+      },
+    });
+
+    if (userPages?.pages.length === 10) {
+      return res.status(403).json({
+        msg: "Only 10 pages can be created per user",
       });
     }
 
@@ -81,11 +96,11 @@ router.post("/createPage", middleware, async (req: any, res) => {
       },
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       msg: "Page Created Successfully",
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       msg: "Internal Server Error",
     });
   }
@@ -99,7 +114,7 @@ router.post("/updatePage", middleware, async (req: any, res) => {
     const isSuccess = updatePageDetail.safeParse(updateFields);
 
     if (!isSuccess.success) {
-      res.status(400).json({
+      return res.status(400).json({
         msg: "Invalid Data",
       });
     }
@@ -116,11 +131,10 @@ router.post("/updatePage", middleware, async (req: any, res) => {
           password: password,
         },
       });
-      res.status(200).json({
+      return res.status(200).json({
         msg: "Page Password Updated",
       });
     } else if (updateFields.description != undefined) {
-      console.log("description updating");
       const updated = await prisma.page.update({
         where: {
           id: updateFields.id,
@@ -130,12 +144,12 @@ router.post("/updatePage", middleware, async (req: any, res) => {
           description: updateFields.description,
         },
       });
-      res.status(200).json({
+      return res.status(200).json({
         msg: "Description Password Updated",
       });
     }
   } catch (err) {
-    res.status(401).json({
+    return res.status(401).json({
       msg: "Invalid owner of page",
     });
   }
@@ -157,12 +171,12 @@ router.get("/getPages", middleware, async (req: any, res) => {
       },
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       msg: "Fetched Successfully",
       Data: pages,
     });
   } catch (err) {
-    res.status(401).json({
+    return res.status(401).json({
       msg: "Invalid Request",
     });
   }
@@ -170,7 +184,11 @@ router.get("/getPages", middleware, async (req: any, res) => {
 
 router.post("/geturls", async (req: any, res) => {
   try {
-    const pageFields: { password: string; pageUID: string } = req.body;
+    const pageFields: {
+      password: string;
+      pageUID: string;
+      isFirstTime: boolean;
+    } = req.body;
 
     const response = await prisma.page.findUnique({
       where: {
@@ -188,26 +206,52 @@ router.post("/geturls", async (req: any, res) => {
     }
 
     if (response.password == null || response.password == "") {
+      await prisma.page.update({
+        where: {
+          pageUID: pageFields.pageUID,
+        },
+        data: {
+          visitorCount: {
+            increment: 1,
+          },
+        },
+      });
+
       return res.status(200).json({
         msg: "Url's Fetched Successfully",
         urls: response.urls,
       });
     } else {
-      bcrypt.compare(pageFields.password, response.password, (err, result) => {
-        if (err || result == false) {
-          return res.status(401).json({
-            msg: "Invalid Password",
+      bcrypt.compare(
+        pageFields.password,
+        response.password,
+        async (err, result) => {
+          if (err || result == false) {
+            return res.status(401).json({
+              msg: "Invalid Password",
+            });
+          }
+
+          await prisma.page.update({
+            where: {
+              pageUID: pageFields.pageUID,
+            },
+            data: {
+              visitorCount: {
+                increment: 1,
+              },
+            },
+          });
+
+          return res.status(200).json({
+            msg: "Url's Fetched Successfully",
+            urls: response.urls,
           });
         }
-
-        return res.status(200).json({
-          msg: "Url's Fetched Successfully",
-          urls: response.urls,
-        });
-      });
+      );
     }
   } catch (err) {
-    res.status(401).json({
+    return res.status(401).json({
       msg: "Something Went Wrong",
     });
   }
@@ -225,39 +269,37 @@ router.delete("/deleteUrl/*", middleware, async (req: any, res) => {
       },
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       msg: "Page Deleted Successfully",
     });
   } catch (err: any) {
-    res.status(403).json({
+    return res.status(403).json({
       msg: "You Are Not Authorized To Delete This Page",
     });
   }
 });
 
-router.post('/isValidUID/*',async(req:any,res)=>{
-  
-  try{
-    const fullPath: string = req.params[0].split(',')[0];
-   
-    let result=true;
+router.post("/isValidUID/*", async (req: any, res) => {
+  try {
+    const fullPath: string = req.params[0].split(",")[0];
 
-    const response=await prisma.page.findUnique({
-      where:{
-        pageUID:fullPath
-      }
+    let result = true;
+
+    const response = await prisma.page.findUnique({
+      where: {
+        pageUID: fullPath,
+      },
     });
 
-    if(response) result=false;
-    
+    if (response) result = false;
 
     return res.status(200).json({
       result,
-    })
-  }catch(err){
-    res.status(500).json({
-      msg:"Internal Server Error"
-    })
+    });
+  } catch (err) {
+    return res.status(500).json({
+      msg: "Internal Server Error",
+    });
   }
 });
 
@@ -300,7 +342,6 @@ router.get("/hasPassword", async (req: any, res) => {
       IsOwner,
     });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       msg: "Something Went Wrong",
     });
@@ -336,8 +377,7 @@ router.post("/insertUrl", middleware, async (req: any, res) => {
       msg: "Url Added Successfully",
     });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({
+    return res.status(500).json({
       msg: "Internal Server Error",
     });
   }

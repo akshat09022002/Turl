@@ -15,6 +15,8 @@ import { Button } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import { useSetRecoilState } from "recoil";
 import { z } from "zod";
+import { Spinner } from "../ui/spinner";
+import { useState } from "react";
 
 const formSchema = z.object({
   newDescription: z.string().min(10, {
@@ -29,8 +31,8 @@ const EditDialog = ({
   rowId: string;
   setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-
-  const setrerender= useSetRecoilState(rerender);
+  const setrerender = useSetRecoilState(rerender);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,6 +45,7 @@ const EditDialog = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      setIsLoading(true);
       await axios
         .post(
           `${import.meta.env.VITE_BACKEND_API}/pages/updatePage`,
@@ -66,8 +69,9 @@ const EditDialog = ({
       toast({
         title: err.response.data.msg,
       });
-    }finally{
-      setrerender((e)=> e+1);
+    } finally {
+      setrerender((e) => e + 1);
+      setIsLoading(false);
     }
   };
 
@@ -96,9 +100,15 @@ const EditDialog = ({
               </FormItem>
             )}
           />
-          <Button className="mt-4 bg-[#cc1b6c] font-semibold" type="submit">
-            Submit
-          </Button>
+          {isLoading ? (
+            <div className="w-1/5">
+              <Spinner size="medium" className="mt-4 text-[#cc1b6c]" />
+            </div>
+          ) : (
+            <Button className="mt-4 bg-[#cc1b6c] font-semibold" type="submit">
+              Submit
+            </Button>
+          )}
         </form>
       </Form>
     </div>

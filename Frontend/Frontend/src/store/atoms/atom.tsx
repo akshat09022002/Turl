@@ -17,28 +17,41 @@ export const openDialogHome = atom({
   default: false,
 });
 
-export const isSignedIn= atom({
-  key:"isSignedIn",
-  default: false
-})
+export const isSignedIn = atom({
+  key: "isSignedIn",
+  default: false,
+});
 
-export const rerender=atom({
-  key:"rerender",
-  default: 0
-})
+export const rerender = atom({
+  key: "rerender",
+  default: 0,
+});
 
-export const rerenderPage=atom({
-  key:'rerenderPage',
-  default: 0
-})
+export const rerenderPage = atom({
+  key: "rerenderPage",
+  default: 0,
+});
 
-export const urlsStateFamily= atomFamily<{
-  urls: urlType[],
-  password: string,
-},string>({
-  key:"urlsStateFamily",
-  default:{
+export const rerenderUrlPage = atom({
+  key: "rerenderUrlPage",
+  default: 0,
+});
+
+export const tableLoader = atom({
+  key: "tableLoader",
+  default: false,
+});
+
+export const urlsStateFamily = atomFamily<
+  {
+    urls: urlType[];
+    password: string;
+  },
+  string
+>({
+  key: "urlsStateFamily",
+  default: {
     urls: [],
-    password: ""
-  }
-})
+    password: "",
+  },
+});

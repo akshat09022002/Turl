@@ -26,8 +26,8 @@ export const sendOtpEmail = async (to: string, otp: string) => {
       subject: "Please verify you email.", // Subject line
       html: `<p>Your OTP code is <strong>${otp}</strong></p>. This otp is only valid for 5 mins.`, // html body
     });
-    return "OTP sent successfully";
+    return true;
   } catch (error) {
-    return "Something went wrong";
+    return false;
   }
 };

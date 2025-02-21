@@ -23,24 +23,22 @@ const CustomizationIntro = () => {
           transition={{ duration: 2 }}
           className="w-3/5 flex flex-col items-center md:mr-12"
         >
-          
-            <h1 className="font-semibold mb-8 text-lg  sm:text-2xl  sm:mb-12 ">
-              Customised URL's
-            </h1>
-            <ul className="list-disc font-Roboto text-xs pl-2 list text-start sm:text-lg md:text-xl">
-              <li className="py-2">
-                Take control of your URLs by selecting your preferred UID.
-              </li>
-              <li className="py-2">
-                Enjoy a longer lifespan for your URLs — valid for up to two months
-                instead of just one.
-              </li>
-              <li className="py-2">
-                Effortlessly manage all your previously created URLs from a
-                single, convenient location.
-              </li>
-            </ul>
-          
+          <h1 className="font-semibold mb-8 text-lg  sm:text-2xl  sm:mb-12 ">
+            Customised URL's
+          </h1>
+          <ul className="list-disc font-Roboto text-xs pl-2 list text-start sm:text-lg md:text-xl">
+            <li className="py-2">
+              Take control of your URLs by selecting your preferred UID.
+            </li>
+            <li className="py-2">
+              Enjoy a longer lifespan for your URLs — valid for up to two months
+              instead of just one.
+            </li>
+            <li className="py-2">
+              Effortlessly manage all your previously created URLs from a
+              single, convenient location.
+            </li>
+          </ul>
         </motion.div>
       </div>
     </div>

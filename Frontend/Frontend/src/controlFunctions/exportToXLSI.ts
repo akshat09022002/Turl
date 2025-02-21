@@ -25,7 +25,7 @@ export const exportToExcel = async (
   password: string,
   pageUID: string
 ) => {
-    console.log(password)
+   
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet(pageUID);
 
@@ -61,7 +61,7 @@ export const exportToExcel = async (
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-  saveAs(blob, "table_data.xlsx");
+  saveAs(blob, `${pageUID}.xlsx`);
 };
 
 export const exportToExcelPage = async (
@@ -74,7 +74,6 @@ export const exportToExcelPage = async (
 
   tableData.forEach((row) => {
     const values=Object.values(row);
-    console.log(values);
     const description=values[1];
     const link= `${import.meta.env.VITE_FRONTEND_API}/pg/${values[2]}`
     const newRow = worksheet.addRow([description, link]);
@@ -88,5 +87,32 @@ export const exportToExcelPage = async (
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-  saveAs(blob, "table_data.xlsx");
+  saveAs(blob, "Pages.xlsx");
 };
+
+export const exportToExcelMyUrls = async(tableData:urlType[])=>{
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("My Pages");
+
+  worksheet.addRow(["Link","Encapsulated Link"]);
+
+  tableData.forEach((row) => {
+    const values=Object.values(row);
+    const encapsulatedLink=values[1];
+    const link= `${import.meta.env.VITE_BACKEND_API}/${values[5]}`;
+    const newRow = worksheet.addRow([link, encapsulatedLink]);
+
+    newRow.getCell(1).value = { text: link, hyperlink: link };
+    newRow.getCell(1).font = { color: { argb: "0563C1" }, underline: true };
+    //@ts-ignore
+    newRow.getCell(2).value = { text: encapsulatedLink, hyperlink: encapsulatedLink };
+    newRow.getCell(2).font = { color: { argb: "0563C1" }, underline: true };
+});
+
+  const buffer = await workbook.xlsx.writeBuffer();
+
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  saveAs(blob, "MyURLs.xlsx");
+}

@@ -14,6 +14,8 @@ import axios from "axios";
 import { Button } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Spinner } from "../ui/spinner";
+import { useState } from "react";
 
 const formSchema = z.object({
   newPassword: z
@@ -33,6 +35,8 @@ const PasswordDialog = ({
   rowId: string;
   setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -42,6 +46,7 @@ const PasswordDialog = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      setIsLoading(true);
       await axios
         .post<{ msg: string }>(
           `${import.meta.env.VITE_BACKEND_API}/pages/updatePage`,
@@ -65,6 +70,8 @@ const PasswordDialog = ({
       toast({
         title: err.response.data.msg,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -98,12 +105,18 @@ const PasswordDialog = ({
               </FormItem>
             )}
           />
-          <Button
-            className="mt-4 bg-[#cc1b6c] hover:bg-blue-800] font-semibold"
-            type="submit"
-          >
-            Submit
-          </Button>
+          {isLoading ? (
+            <div className="w-1/5">
+              <Spinner size="medium" className="mt-4 text-[#cc1b6c]" />
+            </div>
+          ) : (
+            <Button
+              className="mt-4 bg-[#cc1b6c] hover:bg-blue-800] font-semibold"
+              type="submit"
+            >
+              Submit
+            </Button>
+          )}
         </form>
       </Form>
     </div>

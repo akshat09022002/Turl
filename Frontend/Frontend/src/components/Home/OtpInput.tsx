@@ -33,9 +33,15 @@ const FormSchema = z.object({
   }),
 });
 
-const OtpInput = ({setIsOpenDialog,setSignupClose}:{setIsOpenDialog:React.Dispatch<React.SetStateAction<boolean>>,setSignupClose:React.Dispatch<React.SetStateAction<boolean>>}) => {
+const OtpInput = ({
+  setIsOpenDialog,
+  setSignupClose,
+}: {
+  setIsOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  setSignupClose: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   const [loading, setloading] = useState(false);
-  const setLoggedIn=useSetRecoilState(isSignedIn);
+  const setLoggedIn = useSetRecoilState(isSignedIn);
 
   useEffect(() => {
     setloading(false);
@@ -50,7 +56,6 @@ const OtpInput = ({setIsOpenDialog,setSignupClose}:{setIsOpenDialog:React.Dispat
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setloading(true);
-    console.log(data.pin);
     try {
       await axios
         .get<{ msg: string }>(
@@ -62,7 +67,6 @@ const OtpInput = ({setIsOpenDialog,setSignupClose}:{setIsOpenDialog:React.Dispat
           }
         )
         .then((response: any) => {
-          console.log(response.data);
           toast({
             title: response.data.msg,
           });
@@ -76,7 +80,6 @@ const OtpInput = ({setIsOpenDialog,setSignupClose}:{setIsOpenDialog:React.Dispat
       });
     } finally {
       setloading(false);
-      
     }
   }
 

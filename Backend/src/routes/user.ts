@@ -5,12 +5,15 @@ import {
   userCreden,
   loginCredenType,
   loginCreden,
+  updatePasswordDetailType,
+  updatePasswordDetail,
 } from "../schema";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import otpGenerator from "otp-generator";
 import { sendOtpEmail } from "./nodemailer";
+import { middleware } from "../middleware/middleware";
 
 const prisma = new PrismaClient();
 
@@ -36,7 +39,7 @@ router.post("/signup", async (req, res) => {
   const inputCheck = userCreden.safeParse(userDetails);
   if (inputCheck.success === false) {
     return res.status(403).json({
-      message: "invalid credentials",
+      message: "Invalid Credentials",
     });
   }
 
@@ -49,7 +52,7 @@ router.post("/signup", async (req, res) => {
 
     if (response) {
       return res.status(403).json({
-        msg: "user already exists",
+        msg: "User Already Exists",
       });
     }
 
@@ -87,13 +90,18 @@ router.post("/signup", async (req, res) => {
     });
 
     await sendOtpEmail(userDetails.email, OTP).then((response) => {
-      return res.status(200).json({
-        msg: response,
+      if (response) {
+        return res.status(200).json({
+          msg: "Otp Sent Successfully",
+        });
+      }
+      return res.status(500).json({
+        msg: "Something Went Wrong",
       });
     });
   } catch {
-    res.status(400).json({
-      msg: "something went wrong",
+    return res.status(400).json({
+      msg: "Something Went Wrong",
     });
   }
 });
@@ -105,7 +113,7 @@ router.post("/login", async (req, res) => {
 
   if (inputCheck.success === false) {
     return res.status(401).json({
-      msg: "invalid credentials",
+      msg: "Invalid Credentials",
     });
   }
 
@@ -118,14 +126,14 @@ router.post("/login", async (req, res) => {
 
     if (!response) {
       return res.status(401).json({
-        msg: "invalid credentials",
+        msg: "Invalid Credentials",
       });
     }
 
     bcrypt.compare(userDetails.password, response.password, (err, result) => {
       if (err || result === false) {
         return res.status(401).json({
-          msg: "invalid credentials",
+          msg: "Invalid Credentials",
         });
       }
 
@@ -140,18 +148,90 @@ router.post("/login", async (req, res) => {
       res.clearCookie("user");
 
       return res.status(200).json({
-        msg: "login successful",
+        msg: "Login Successful",
         firstName: response.firstName.toUpperCase(),
         lastName: response.lastName?.toUpperCase(),
         email: response.email.toLowerCase(),
       });
     });
   } catch (err) {
-    console.log(err);
     res.clearCookie("user");
 
     return res.status(401).json({
-      msg: "something went wrong try again after some time",
+      msg: "Something Went Wrong Try Again After Some Time",
+    });
+  }
+});
+
+router.post("/updatePassword", middleware, async (req: any, res) => {
+  try {
+    const passwordDetails: updatePasswordDetailType = req.body;
+    const userId = req.userId;
+
+    if (!userId) {
+      return res.status(403).json({
+        msg: "Unauthorized Request",
+      });
+    }
+
+    const success = updatePasswordDetail.safeParse(passwordDetails);
+
+    if (!success.success) {
+      return res.status(400).json({
+        msg: "Invalid Input",
+      });
+    }
+
+    const userDetails = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!userDetails) {
+      return res.status(403).json({
+        msg: "Unauthorized Request",
+      });
+    }
+
+    bcrypt.compare(
+      passwordDetails.currentPassword,
+      userDetails.password,
+      async (err, result) => {
+        if (err || result === false) {
+          return res.status(401).json({
+            msg: "Invalid Credentials",
+          });
+        }
+
+        const saltRounds = 10;
+        bcrypt.hash(
+          passwordDetails.newPassword,
+          saltRounds,
+          async (err, hash) => {
+            if (err) {
+              return res.status(500).json({
+                msg: "Server Error",
+              });
+            }
+            await prisma.user.update({
+              where: {
+                id: userId,
+              },
+              data: {
+                password: hash,
+              },
+            });
+            return res.status(200).json({
+              msg: "Password Updated Successfully",
+            });
+          }
+        );
+      }
+    );
+  } catch (err) {
+    return res.status(500).json({
+      msg: "Server Error",
     });
   }
 });
@@ -168,7 +248,7 @@ router.get("/verify-otp", async (req, res) => {
 
     if (response == null || response.expiresAt < new Date()) {
       return res.status(401).json({
-        msg: "invalid request",
+        msg: "Invalid Request",
       });
     }
 
@@ -195,19 +275,19 @@ router.get("/verify-otp", async (req, res) => {
       });
 
       return res.status(200).json({
-        msg: "signed up successfully",
+        msg: "Signed Up Successfully",
         firstName: userDetails.firstName.toUpperCase(),
         lastName: userDetails.lastName?.toUpperCase(),
         email: userDetails.email.toLowerCase(),
       });
     } else {
       return res.status(401).json({
-        msg: "invalid otp",
+        msg: "Invalid Otp",
       });
     }
   } catch (err) {
     return res.status(401).json({
-      msg: "Something went wrong",
+      msg: "Something Went Wrong",
     });
   }
 });
@@ -241,7 +321,7 @@ router.get("/logout", (req, res) => {
     });
 
     return res.status(200).json({
-      msg: "logout successful",
+      msg: "Logout Successful",
     });
   } catch (err) {
     return res.status(401).json({

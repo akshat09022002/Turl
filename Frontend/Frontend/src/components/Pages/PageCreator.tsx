@@ -66,13 +66,12 @@ const PageCreator = () => {
   const [debounceValue, debounceState] = useDebounceValue(customUID, 300);
   const [debounceLoader, setDebounceLoader] = useState(false);
   const [canAdd, setCanAdd] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const { toast } = useToast();
 
   useEffect(() => {
     if (!debounceValue) return;
-
-    console.log("calling the api with", debounceValue);
 
     const fetchCustomUIDAvailability = async () => {
       setCanAdd(false);
@@ -86,7 +85,6 @@ const PageCreator = () => {
             withCredentials: true,
           }
         );
-        console.log("API Response:", response.data.result);
         setCanAdd(response.data.result);
       } catch (error) {
         console.error("Error checking custom UID:", error);
@@ -99,6 +97,7 @@ const PageCreator = () => {
   }, [debounceValue]);
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+    setLoading(true);
     try {
       await axios
         .post<{ msg: string }>(
@@ -126,6 +125,7 @@ const PageCreator = () => {
       form.reset();
       setCanAdd(true);
       debounceState("");
+      setLoading(false);
     }
   }
 
@@ -233,17 +233,27 @@ const PageCreator = () => {
               *If no custom UID is provided, an automated UID will be assigned.
             </FormDescription>
             <CustomTooltip
-              message={canAdd ? "Create Page" : "PageUID is already taken"}
+              message={
+                loading
+                  ? "Creating Page"
+                  : canAdd
+                  ? "Create Page"
+                  : "PageUID is already taken"
+              }
             >
-              <Button
-                disabled={canAdd ? false : true}
-                className={`mt-2 bg-white hover:bg-gray-300 text-black text-sm sm:text-base md:text-lg md:h-12 md:w-18 ${
-                  canAdd ? "" : "cursor-not-allowed"
-                }`}
-                type="submit"
-              >
-                Create
-              </Button>
+              {loading ? (
+                <Spinner size="medium" className="text-white" />
+              ) : (
+                <Button
+                  disabled={canAdd ? false : true}
+                  className={`mt-2 bg-white hover:bg-gray-300 text-black text-sm sm:text-base md:text-lg md:h-12 md:w-18 ${
+                    canAdd ? "" : "cursor-not-allowed"
+                  }`}
+                  type="submit"
+                >
+                  Create
+                </Button>
+              )}
             </CustomTooltip>
           </form>
         </Form>

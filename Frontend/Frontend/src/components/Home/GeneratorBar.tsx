@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PlaceholdersAndVanishInput } from "../ui2/placeholders-and-vanish-input";
 import UrlResult from "./UrlResult";
 import { toast } from "@/hooks/use-toast";
@@ -8,31 +8,27 @@ const GeneratorBar = () => {
   const [input, setInput] = useState<string>("");
   const [urlResult, setUrlResult] = useState("");
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (input: string) => {
     try {
       await axios
         .post<{ short_url: string }>(
           `${import.meta.env.VITE_BACKEND_API}/generateUrl`,
           {
-            url: input,
+            url: input.split(" ").join(""),
           },
           {
             withCredentials: true,
           }
         )
         .then((response) => {
-          console.log(response.data);
           setUrlResult(response.data.short_url);
         });
     } catch (err: any) {
-      console.log(err);
       toast({
         title: err.response.data.msg,
       });
     }
   };
-
-  useEffect(() => {}, [urlResult]);
 
   return (
     <>
@@ -41,12 +37,11 @@ const GeneratorBar = () => {
           placeholders={["Enter a URL to shorten"]}
           onChange={(e) => setInput(e.target.value)}
           onSubmit={async () => {
-            setUrlResult(input);
-            await handleSubmit();
+            await handleSubmit(input);
           }}
         ></PlaceholdersAndVanishInput>
 
-        {urlResult != "" && (
+        {urlResult !== "" && (
           <UrlResult
             urlResult={urlResult}
             setUrlResult={setUrlResult}
