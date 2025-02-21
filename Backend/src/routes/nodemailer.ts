@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: "smtpout.secureserver.net",
+  host: "mail.privateemail.com",
   secure: true, // true for 465, false for other ports
   tls: {
     ciphers: "SSLv3",
@@ -13,8 +13,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   debug: true,
   auth: {
-    user: process.env.EMAIL, // your GoDaddy email address
-    pass: process.env.EMAIL_PASSWORD, // your GoDaddy email password
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_PASSWORD,
   },
 });
 

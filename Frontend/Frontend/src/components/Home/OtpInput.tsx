@@ -67,6 +67,14 @@ const OtpInput = ({
           }
         )
         .then((response: any) => {
+          localStorage.setItem(
+            "user",
+            JSON.stringify({
+              firstName: response.data.firstName,
+              lastName: response.data.lastName,
+              email: response.data.email,
+            })
+          );
           toast({
             title: response.data.msg,
           });
