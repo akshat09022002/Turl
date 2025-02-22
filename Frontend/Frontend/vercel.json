@@ -1,0 +1,9 @@
+{
+    "rewrites": [
+      { "source": "/", "destination": "/" },
+      { "source": "/fe/pages", "destination": "/" },
+      { "source": "/fe/myurls", "destination": "/" },
+      { "source": "/pg/:id", "destination": "/" },
+      { "source": "/:urlCode", "destination": "/api/redirect/:urlCode" }
+    ]
+  }

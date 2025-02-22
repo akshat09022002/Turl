@@ -56,7 +56,7 @@ const PageCreator = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       description: "",
-      urlPrefix: "localhost:3000/pg",
+      urlPrefix: "turl.co.in/pg",
       customUID: "",
       password: "",
     },
