@@ -154,7 +154,7 @@ router.post("/generateUrl", async (req, res) => {
           });
 
           return res.status(200).json({
-            short_url: "localhost:3000/" + UID,
+            short_url: "turl.co.in/" + UID,
             msg: "Url generated successfully.",
           });
         } else {
@@ -176,7 +176,7 @@ router.post("/generateUrl", async (req, res) => {
         });
 
         return res.status(200).json({
-          short_url: "localhost:3000/" + UID,
+          short_url: "turl.co.in/" + UID,
         });
       }
     } else {
@@ -211,7 +211,7 @@ router.post("/generateUrl", async (req, res) => {
       });
 
       return res.status(200).json({
-        short_url: "localhost:3000/" + UID,
+        short_url: "turl.co.in/" + UID,
       });
     }
   } catch {
@@ -332,39 +332,32 @@ router.get("/getUrls", middleware, async (req: any, res) => {
   }
 });
 
-router.get("/*", async (req, res) => {
-  const fullPath: string = JSON.parse(JSON.stringify(req.params))["0"];
+router.get("/redirect/:urlCode", async (req, res) => {
+  const urlCode = req.params.urlCode;
 
   try {
     const finder = await prisma.uRL.findUnique({
-      where: {
-        uid: fullPath,
-      },
+      where: { uid: urlCode },
     });
 
     if (!finder) {
-      return res.status(403).json({
-        error: "url not found",
-      });
-    } else {
-      const update = await prisma.uRL.update({
-        where: {
-          uid: fullPath,
-        },
-        data: {
-          lastVisit: new Date(),
-          visitorCount: {
-            increment: 1,
-          },
-        },
-      });
-
-      return res.status(200).redirect(finder.url);
+      return res.status(404).json({ msg: "URL Not Found" });
     }
-  } catch (err) {
-    return res.status(404).json({
-      error: "Something went wrong",
+
+    await prisma.uRL.update({
+      where: { uid: urlCode },
+      data: {
+        lastVisit: new Date(),
+        visitorCount: { increment: 1 },
+      },
     });
+
+    return res.status(200).json({
+      msg: "URL Found",
+      url: finder.url,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: "Something went wrong" });
   }
 });
 

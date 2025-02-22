@@ -53,7 +53,7 @@ const UrlAdder = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       description: "",
-      urlPrefix: "localhost:3000/",
+      urlPrefix: "turl.co.in/",
       customUID: "",
       url: "",
     },

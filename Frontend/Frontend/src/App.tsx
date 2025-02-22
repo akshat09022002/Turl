@@ -15,8 +15,8 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/pages" element={<Pages />} />
-            <Route path="/myurls" element={<MyUrls />} />
+            <Route path="/fe/pages" element={<Pages />} />
+            <Route path="/fe/myurls" element={<MyUrls />} />
             <Route path="/pg/:id" element={<UrlPage />} />
           </Routes>
         </BrowserRouter>
