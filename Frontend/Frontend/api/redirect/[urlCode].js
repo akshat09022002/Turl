@@ -10,15 +10,19 @@ export default async function handler(req, res) {
   
     // Fetch target URL from backend
     try {
-      const response =await axios.get<{msg:string,url:string}>(`${import.meta.env.VITE_BACKEND_API}/redirect/${urlCode}`,{
-        withCredentials:true
-      });
+      const response =await axios.get<{msg:string,url:string}>(`${import.meta.env.VITE_BACKEND_API}/redirect/${urlCode}`);
       if (response.data.url) {
         res.status(301).redirect(response.data.url); // Server-side redirect
       } else {
-        res.status(404).send("URL not found"); // Or redirect to homepage
+        res.status(404).json({
+          msg:"URL not found",
+          response: response.data
+        }); // Or redirect to homepage
       }
     } catch (error) {
-      res.status(500).send("Error fetching redirect");
+      res.status(500).json({
+        msg:"Server Error",
+        reponse: error
+      });
     }
   }
