@@ -72,7 +72,7 @@ DATABASE_URL="Enter your database connection string"
 FRONTEND_URL="http://localhost:5173"
 BACKEND_URL="http://localhost:3000"
 ```
-- `EMAIL` & `EMAIL_PASSWORD`: Used for sending emails (e.g., Gmail credentials).
+- `EMAIL` & `EMAIL_PASSWORD`: Used for sending OTP's (Any SMTP mail credentials).
 - `JWT_SECRET`: A long, random secret key for authentication.
 - `DATABASE_URL`: Your database connection string.
 - `FRONTEND_URL`: Must match `VITE_FRONTEND_API`.
