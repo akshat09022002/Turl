@@ -1,3 +1,6 @@
+// This is a function used for server side rendering in vercel environment. This will not work in local environment.
+// Use this route 'BACKEND_URL/redirect/:urlCode' for local development environment.
+
 export default async function handler(req, res) {
   const { urlCode } = req.query;
 
@@ -8,7 +11,7 @@ export default async function handler(req, res) {
   }
 
   const backendUrl = `https://be.turl.co.in/redirect/${urlCode}`;
-  
+
   try {
     const response = await fetch(backendUrl);
 

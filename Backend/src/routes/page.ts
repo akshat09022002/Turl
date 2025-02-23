@@ -23,10 +23,8 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const BACKEND_URL = process.env.BACKEND_URL;
-if (!JWT_SECRET) throw Error("No JWT Present");
-if (!BACKEND_URL) throw Error("No BACKEND_URL present");
+const JWT_SECRET = process.env.JWT_SECRET as string;
+const BACKEND_URL = process.env.BACKEND_URL as string;
 
 const router = express.Router();
 

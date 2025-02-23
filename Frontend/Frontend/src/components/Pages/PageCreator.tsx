@@ -24,6 +24,8 @@ import { useEffect, useState } from "react";
 import { Spinner } from "../ui/spinner";
 import CustomTooltip from "../common/CustomTooltip";
 
+const FRONTEND_API = import.meta.env.VITE_FRONTEND_API.split("/")[2];
+
 const FormSchema = z.object({
   description: z.string().min(10, {
     message: "Description must be at least 10 characters.",
@@ -56,7 +58,7 @@ const PageCreator = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       description: "",
-      urlPrefix: "turl.co.in/pg/",
+      urlPrefix: `${FRONTEND_API}/pg/`,
       customUID: "",
       password: "",
     },
