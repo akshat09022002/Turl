@@ -10,7 +10,9 @@ export default async function handler(req, res) {
   
     // Fetch target URL from backend
     try {
-      const response = axios.get<{msg:string,url:string}>(`${import.meta.env.VITE_BACKEND_API}/redirect/${urlCode}`);
+      const response =await axios.get<{msg:string,url:string}>(`${import.meta.env.VITE_BACKEND_API}/redirect/${urlCode}`,{
+        withCredentials:true
+      });
       if (response.data.url) {
         res.status(301).redirect(response.data.url); // Server-side redirect
       } else {
