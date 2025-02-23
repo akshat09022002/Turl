@@ -310,6 +310,7 @@ const MyUrls = () => {
   };
 
   useEffect(() => {
+    console.log("rerendering");
     getUrls();
   }, [renderUrls]);
 
