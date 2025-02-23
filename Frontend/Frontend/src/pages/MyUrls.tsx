@@ -51,6 +51,7 @@ import {
   DropdownMenuSubTrigger,
 } from "@radix-ui/react-dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
 
 type urlType = {
   id: string;
@@ -76,6 +77,7 @@ const MyUrls = () => {
   );
   const [renderUrls, setRerender] = useRecoilState(rerenderUrlPage);
   const [firstRender, setFirstRender] = useState(true);
+  const navigate=useNavigate();
 
 
   const handleDelete = async (uid: string) => {
@@ -303,6 +305,8 @@ const MyUrls = () => {
       toast({
         title: err.response.data.msg,
       });
+      setData([]);
+      navigate('/')
     }
   };
 
