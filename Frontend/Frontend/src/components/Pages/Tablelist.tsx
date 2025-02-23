@@ -289,7 +289,7 @@ const Tablelist = () => {
                           <Copy
                             onClick={() => {
                               navigator.clipboard.writeText(
-                                `${import.meta.env.VITE_FRONTEND_API}/${
+                                `${import.meta.env.VITE_FRONTEND_API}/pg/${
                                   rowData.pageUID
                                 }`
                               );

@@ -113,7 +113,7 @@ const UrlResult = ({
           toast({
             title: response.data.msg,
           });
-          const backend_api = import.meta.env.VITE_BACKEND_API.split("/");
+          const backend_api = import.meta.env.VITE_FRONTEND_API.split("/");
           const newUrl = `${backend_api[2]}/${values.customUID}`;
           setUrlResult(newUrl);
           debounceState("");
