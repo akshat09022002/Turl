@@ -362,6 +362,9 @@ const Tablelist = () => {
           setPageLoader(false);
         });
     } catch (err: any) {
+      toast({
+        title: err.response.data.msg,
+      });
       setData([]);
       navigate("/");
     }
