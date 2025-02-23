@@ -113,7 +113,7 @@ const MyUrls = () => {
       cell: ({ row }) => {
         return (
           <a
-            href={`${import.meta.env.VITE_BACKEND_API}/${row.getValue("uid")}`}
+            href={`${import.meta.env.VITE_FRONTEND_API}/${row.getValue("uid")}`}
             target="_blank"
             rel="noopener noreferrer"
             className="truncate hover:underline"
@@ -121,7 +121,7 @@ const MyUrls = () => {
               setRerender((e) => e + 1);
             }}
           >
-            {`${import.meta.env.VITE_BACKEND_API}/${row.getValue("uid")}`}
+            {`${import.meta.env.VITE_FRONTEND_API}/${row.getValue("uid")}`}
           </a>
         );
       },
@@ -172,7 +172,7 @@ const MyUrls = () => {
         const rowId = rowData.id;
         const rowLastVisit = new Date(rowData.lastVisit);
         const encodedURL = encodeURIComponent(
-          `${import.meta.env.VITE_BACKEND_API}/${rowData.uid}`
+          `${import.meta.env.VITE_FRONTEND_API}/${rowData.uid}`
         );
         const shareText =
           "This URL was generated using Turl, the ultimate URL shortener. Check it out!";
@@ -203,7 +203,7 @@ const MyUrls = () => {
                           <Copy
                             onClick={() => {
                               navigator.clipboard.writeText(
-                                `${import.meta.env.VITE_BACKEND_API}/${
+                                `${import.meta.env.VITE_FRONTEND_API}/${
                                   rowData.uid
                                 }`
                               );

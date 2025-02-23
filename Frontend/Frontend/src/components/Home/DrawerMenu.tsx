@@ -79,7 +79,7 @@ export function DrawerMenu() {
             <li
               className="py-4 sm:py-8 hover:scale-105 hover:bg-gradient-to-r hover:from-[#c70074] hover:to-[#3f2097] hover:bg-clip-text hover:text-transparent text-base sm:text-2xl"
               onClick={() => {
-                navigation("/myurls");
+                navigation("/fe/myurls");
               }}
             >
               My URLs
@@ -87,7 +87,7 @@ export function DrawerMenu() {
             <li
               className="py-4 sm:py-8 hover:scale-105 hover:bg-gradient-to-r hover:from-[#c70074] hover:to-[#3f2097] hover:bg-clip-text hover:text-transparent text-base sm:text-2xl"
               onClick={() => {
-                navigation("/pages");
+                navigation("/fe/pages");
               }}
             >
               My Pages

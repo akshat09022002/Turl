@@ -34,7 +34,7 @@ export const exportToExcel = async (
   tableData.forEach((row) => {
     const values=Object.values(row);
     const description=values[3];
-    const link= `${import.meta.env.VITE_BACKEND_API}/${values[1]}`
+    const link= `${import.meta.env.VITE_FRONTEND_API}/${values[1]}`
     const encapsulatedLink=values[5] as string;
     const newRow = worksheet.addRow([description, link, encapsulatedLink]);
 
@@ -99,7 +99,7 @@ export const exportToExcelMyUrls = async(tableData:urlType[])=>{
   tableData.forEach((row) => {
     const values=Object.values(row);
     const encapsulatedLink=values[1];
-    const link= `${import.meta.env.VITE_BACKEND_API}/${values[5]}`;
+    const link= `${import.meta.env.VITE_FRONTEND_API}/${values[5]}`;
     const newRow = worksheet.addRow([link, encapsulatedLink]);
 
     newRow.getCell(1).value = { text: link, hyperlink: link };

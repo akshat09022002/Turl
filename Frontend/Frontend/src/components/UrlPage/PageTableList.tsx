@@ -164,7 +164,7 @@ const PageTablelist = ({
         return (
           <div className="w-full flex justify-center">
             <a
-              href={`${import.meta.env.VITE_BACKEND_API}/${row.getValue(
+              href={`${import.meta.env.VITE_FRONTEND_API}/${row.getValue(
                 "uid"
               )}`}
               onClick={() => {
@@ -228,7 +228,7 @@ const PageTablelist = ({
         const rowId = rowData.id;
         const rowLastVisit = new Date(rowData.lastVisit);
         const encodedURL = encodeURIComponent(
-          `${import.meta.env.VITE_BACKEND_API}/${rowData.uid}`
+          `${import.meta.env.VITE_FRONTEND_API}/${rowData.uid}`
         );
         const shareText =
           "This URL was generated using Turl, the ultimate URL shortener. Check it out!";
@@ -274,7 +274,7 @@ const PageTablelist = ({
                           <Copy
                             onClick={() => {
                               navigator.clipboard.writeText(
-                                `${import.meta.env.VITE_BACKEND_API}/${
+                                `${import.meta.env.VITE_FRONTEND_API}/${
                                   rowData.uid
                                 }`
                               );

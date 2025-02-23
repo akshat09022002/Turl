@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://turl.co.in",
+    origin: "https://turl.co.in",
     credentials: true,
   })
 );
