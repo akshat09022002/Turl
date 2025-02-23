@@ -22,7 +22,8 @@ export default async function handler(req, res) {
     } catch (error) {
       res.status(500).json({
         msg:"Server Error",
-        reponse: error
+        reponse: error,
+        api: import.meta.env.VITE_BACKEND_API
       });
     }
   }
