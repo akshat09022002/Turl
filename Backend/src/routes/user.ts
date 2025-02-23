@@ -85,8 +85,9 @@ router.post("/signup", async (req, res) => {
     res.cookie("user", JSON.stringify(userDetails), {
       httpOnly: true,
       secure: true,
-      maxAge: 60 * 1000,
-      sameSite: "none",
+      maxAge: 5 * 60 * 1000,
+      sameSite: "lax",
+      path: "/"
     });
 
     await sendOtpEmail(userDetails.email, OTP).then((response) => {
@@ -143,6 +144,8 @@ router.post("/login", async (req, res) => {
         httpOnly: true,
         secure: false,
         maxAge: 60 * 24 * 60 * 60 * 1000,
+        sameSite: "lax",
+        path: "/"
       });
 
       res.clearCookie("user");
@@ -240,6 +243,15 @@ router.get("/verify-otp", async (req, res) => {
   try {
     const userDetails: userCredenType = JSON.parse(req.cookies.user);
     let inotp = req.query.otp;
+
+    const success=userCreden.safeParse(userDetails);
+
+    if(!success.success){
+      return res.status(403).json({
+        msg: "Request Timeout. Try Signing Up Again"
+      })
+    }
+
     const response = await prisma.otp.findUnique({
       where: {
         email: userDetails.email,
