@@ -116,13 +116,6 @@ npm run dev
 ```
 Now, visit [http://localhost:5173](http://localhost:5173) in your browser!
 
-## Deployment
-- **Frontend**: Deploy to Vercel using:
-```bash
-vercel --prod
-```
-- **Backend**: Deploy to AWS EC2 and configure with your database and environment variables.
-
 ## Contributing
 Love feedback and ideas! Fork the repo, make your changes, and submit a pull request. Keep it clean and documented.
 
