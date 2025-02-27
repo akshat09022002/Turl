@@ -9,7 +9,7 @@ Turl is a feature-packed URL shortener built to make link sharing easy and power
 - **Secure & Scalable**: Protect your links with passwords and scale effortlessly, whether for personal or business use.
 
 ## Tech Stack
-- **Frontend**: React
+- **Frontend**: React, Recoil
 - **Backend**: TypeScript, Node.js
 - **Database**: Prisma ORM (PostgreSQL)
 - **Deployment**:
