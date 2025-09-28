@@ -120,5 +120,5 @@ Now, visit [http://localhost:5173](http://localhost:5173) in your browser!
 Love feedback and ideas! Fork the repo, make your changes, and submit a pull request. Keep it clean and documented.
 
 ## Contact
-Built by Akshat Singh. Reach out via email: **akshat@onepunchdev.com**. Try Turl and let me know what you think—what works, what could improve?
+Built by Akshat Singh. Reach out via email: **akshat09022002@gmail.com**. Try Turl and let me know what you think—what works, what could improve?
 
