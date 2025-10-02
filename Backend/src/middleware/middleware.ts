@@ -7,11 +7,9 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw Error("No JWT Present");
 
-interface CustomRequest extends Request {
-  userId?: string;
-}
+
 export const middleware = (
-  req: CustomRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -25,10 +23,14 @@ export const middleware = (
 
     const decode = jwt.verify(token, JWT_SECRET) as JwtPayload;
 
+    if(!decode.userid) {
+      throw new Error("Invalid Token");
+    }
+
     req.userId = decode.userid;
 
     next();
-  } catch (err: unknown) {
+  } catch{
     return res.status(200).json({
       msg: "Unauthorized Access",
     });

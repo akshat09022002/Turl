@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import {
   userCredenType,
@@ -154,7 +154,7 @@ router.post("/login", async (req, res) => {
         email: response.email.toLowerCase(),
       });
     });
-  } catch (err) {
+  } catch {
     res.clearCookie("user");
 
     return res.status(401).json({
@@ -163,83 +163,87 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/updatePassword", middleware, async (req: any, res) => {
-  try {
-    const passwordDetails: updatePasswordDetailType = req.body;
-    const userId = req.userId;
+router.post(
+  "/updatePassword",
+  middleware,
+  async (req: Request, res: Response) => {
+    try {
+      const passwordDetails: updatePasswordDetailType = req.body;
+      const userId = req.userId;
 
-    if (!userId) {
-      return res.status(403).json({
-        msg: "Unauthorized Request",
+      if (!userId) {
+        return res.status(403).json({
+          msg: "Unauthorized Request",
+        });
+      }
+
+      const success = updatePasswordDetail.safeParse(passwordDetails);
+
+      if (!success.success) {
+        return res.status(400).json({
+          msg: "Invalid Input",
+        });
+      }
+
+      const userDetails = await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
       });
-    }
 
-    const success = updatePasswordDetail.safeParse(passwordDetails);
+      if (!userDetails) {
+        return res.status(403).json({
+          msg: "Unauthorized Request",
+        });
+      }
 
-    if (!success.success) {
-      return res.status(400).json({
-        msg: "Invalid Input",
-      });
-    }
-
-    const userDetails = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-
-    if (!userDetails) {
-      return res.status(403).json({
-        msg: "Unauthorized Request",
-      });
-    }
-
-    bcrypt.compare(
-      passwordDetails.currentPassword,
-      userDetails.password,
-      async (err, result) => {
-        if (err || result === false) {
-          return res.status(401).json({
-            msg: "Invalid Credentials",
-          });
-        }
-
-        const saltRounds = 10;
-        bcrypt.hash(
-          passwordDetails.newPassword,
-          saltRounds,
-          async (err, hash) => {
-            if (err) {
-              return res.status(500).json({
-                msg: "Server Error",
-              });
-            }
-            await prisma.user.update({
-              where: {
-                id: userId,
-              },
-              data: {
-                password: hash,
-              },
-            });
-            return res.status(200).json({
-              msg: "Password Updated Successfully",
+      bcrypt.compare(
+        passwordDetails.currentPassword,
+        userDetails.password,
+        async (err, result) => {
+          if (err || result === false) {
+            return res.status(401).json({
+              msg: "Invalid Credentials",
             });
           }
-        );
-      }
-    );
-  } catch (err) {
-    return res.status(500).json({
-      msg: "Server Error",
-    });
-  }
-});
 
-router.get("/verify-otp", async (req, res) => {
+          const saltRounds = 10;
+          bcrypt.hash(
+            passwordDetails.newPassword,
+            saltRounds,
+            async (err, hash) => {
+              if (err) {
+                return res.status(500).json({
+                  msg: "Server Error",
+                });
+              }
+              await prisma.user.update({
+                where: {
+                  id: userId,
+                },
+                data: {
+                  password: hash,
+                },
+              });
+              return res.status(200).json({
+                msg: "Password Updated Successfully",
+              });
+            }
+          );
+        }
+      );
+    } catch {
+      return res.status(500).json({
+        msg: "Server Error",
+      });
+    }
+  }
+);
+
+router.get("/verify-otp", async (req: Request, res: Response) => {
   try {
     const userDetails: userCredenType = JSON.parse(req.cookies.user);
-    let inotp = req.query.otp;
+    const inotp = req.query.otp as string;
     const response = await prisma.otp.findUnique({
       where: {
         email: userDetails.email,
@@ -258,7 +262,7 @@ router.get("/verify-otp", async (req, res) => {
       const saltRounds = 10;
 
       bcrypt.hash(userDetails.password, saltRounds, async (err, hash) => {
-        const responseUser = await prisma.user.create({
+        await prisma.user.create({
           data: {
             firstName: userDetails.firstName,
             lastName: userDetails.lastName,
@@ -285,7 +289,7 @@ router.get("/verify-otp", async (req, res) => {
         msg: "Invalid Otp",
       });
     }
-  } catch (err) {
+  } catch {
     return res.status(401).json({
       msg: "Something Went Wrong",
     });
@@ -323,7 +327,7 @@ router.get("/logout", (req, res) => {
     return res.status(200).json({
       msg: "Logout Successful",
     });
-  } catch (err) {
+  } catch {
     return res.status(401).json({
       msg: "Something Went Wrong",
     });

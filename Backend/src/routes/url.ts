@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import {
   updateUrlDetail,
   updateUrlDetailType,
@@ -37,43 +37,47 @@ function generateRandomCode(): string {
   return code;
 }
 
-router.post("/customiseUrl", middleware, async (req, res) => {
-  try {
-    const { url, customUID }: { url: string; customUID: string } = req.body;
-    const uid = url.split("/")[1];
+router.post(
+  "/customiseUrl",
+  middleware,
+  async (req: Request, res: Response) => {
+    try {
+      const { url, customUID }: { url: string; customUID: string } = req.body;
+      const uid = url.split("/")[1];
 
-    const response = await prisma.uRL.findUnique({
-      where: {
-        uid: customUID,
-      },
-    });
+      const response = await prisma.uRL.findUnique({
+        where: {
+          uid: customUID,
+        },
+      });
 
-    if (response) {
-      return res.status(400).json({
-        msg: "Custom UID already taken",
+      if (response) {
+        return res.status(400).json({
+          msg: "Custom UID already taken",
+        });
+      }
+
+      await prisma.uRL.update({
+        where: {
+          uid: uid,
+        },
+        data: {
+          uid: customUID,
+        },
+      });
+
+      return res.status(200).json({
+        msg: "Url updated successfully",
+      });
+    } catch {
+      return res.status(200).json({
+        msg: "Record to update not found",
       });
     }
-
-    await prisma.uRL.update({
-      where: {
-        uid: uid,
-      },
-      data: {
-        uid: customUID,
-      },
-    });
-
-    return res.status(200).json({
-      msg: "Url updated successfully",
-    });
-  } catch (err) {
-    return res.status(200).json({
-      msg: "Record to update not found",
-    });
   }
-});
+);
 
-router.post("/generateUrl", async (req, res) => {
+router.post("/generateUrl", async (req: Request, res: Response) => {
   try {
     const response: urlDetailType = req.body;
     const jwtuserId: string = req.cookies.token;
@@ -139,7 +143,7 @@ router.post("/generateUrl", async (req, res) => {
             });
           }
 
-          const extractor = await prisma.uRL.create({
+          await prisma.uRL.create({
             data: {
               url: response.url,
               uid: response.customised_url_name
@@ -163,7 +167,7 @@ router.post("/generateUrl", async (req, res) => {
           });
         }
       } else {
-        const extractor = await prisma.uRL.create({
+        await prisma.uRL.create({
           data: {
             url: response.url,
             uid: response.customised_url_name
@@ -201,7 +205,7 @@ router.post("/generateUrl", async (req, res) => {
 
       const UID = await generateUniqueCode();
 
-      const extractor = await prisma.uRL.create({
+      await prisma.uRL.create({
         data: {
           uid: UID,
           url: response.url,
@@ -221,7 +225,7 @@ router.post("/generateUrl", async (req, res) => {
   }
 });
 
-router.post("/isValidUID/*", async (req: any, res) => {
+router.post("/isValidUID/*", async (req: Request, res: Response) => {
   try {
     const fullPath: string = req.params[0].split(",")[0];
 
@@ -238,14 +242,14 @@ router.post("/isValidUID/*", async (req: any, res) => {
     return res.status(200).json({
       result,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({
       msg: "Internal Server Error",
     });
   }
 });
 
-router.post("/updateUrl", middleware, async (req: any, res) => {
+router.post("/updateUrl", middleware, async (req: Request, res: Response) => {
   const updateDetails: updateUrlDetailType = req.body;
   const userId = req.userId as string;
 
@@ -257,7 +261,7 @@ router.post("/updateUrl", middleware, async (req: any, res) => {
   }
 
   try {
-    const updated = await prisma.uRL.update({
+    await prisma.uRL.update({
       where: {
         id: updateDetails.id,
         userId: userId,
@@ -270,36 +274,40 @@ router.post("/updateUrl", middleware, async (req: any, res) => {
     return res.status(200).json({
       msg: "Url Updated Successfully",
     });
-  } catch (err) {
+  } catch {
     return res.status(400).json({
       msg: "Invalid Request",
     });
   }
 });
 
-router.delete("/deleteUrl/*", middleware, async (req: any, res) => {
-  const userId = req.userId;
-  const fullPath: string = req.params[0];
+router.delete(
+  "/deleteUrl/*",
+  middleware,
+  async (req: Request, res: Response) => {
+    const userId = req.userId as string;
+    const fullPath: string = req.params[0];
 
-  try {
-    await prisma.uRL.delete({
-      where: {
-        id: fullPath,
-        userId: userId,
-      },
-    });
+    try {
+      await prisma.uRL.delete({
+        where: {
+          id: fullPath,
+          userId: userId,
+        },
+      });
 
-    return res.status(200).json({
-      msg: "Url Deleted Successfully",
-    });
-  } catch {
-    return res.status(500).json({
-      msg: "Something Went Wrong",
-    });
+      return res.status(200).json({
+        msg: "Url Deleted Successfully",
+      });
+    } catch {
+      return res.status(500).json({
+        msg: "Something Went Wrong",
+      });
+    }
   }
-});
+);
 
-router.get("/getUrls", middleware, async (req: any, res) => {
+router.get("/getUrls", middleware, async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
     const urls = await prisma.uRL.findMany({
@@ -325,14 +333,14 @@ router.get("/getUrls", middleware, async (req: any, res) => {
       msg: "Urls Fetched Successfully",
       urls: urls,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({
       msg: "Something Went Wrong",
     });
   }
 });
 
-router.get("/redirect/:urlCode", async (req, res) => {
+router.get("/redirect/:urlCode", async (req: Request, res: Response) => {
   const urlCode = req.params.urlCode;
 
   try {
@@ -356,7 +364,7 @@ router.get("/redirect/:urlCode", async (req, res) => {
       msg: "URL Found",
       url: finder.url,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: "Something went wrong" });
   }
 });
