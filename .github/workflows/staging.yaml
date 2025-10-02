@@ -22,4 +22,5 @@ jobs:
         uses: super-linter/super-linter@v8.2.0
         env:
           DEFAULT_BRANCH: staging
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
