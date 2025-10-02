@@ -68,7 +68,7 @@ const MyUrls = () => {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  const [urlLoader,setUrlLoader]= useState(false);
+  const [urlLoader, setUrlLoader] = useState(false);
   const [csvLoading, setCsvLoading] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [visitorSortingLogo, setVisitorSortingLogo] = useState<React.ReactNode>(
@@ -76,7 +76,6 @@ const MyUrls = () => {
   );
   const [renderUrls, setRerender] = useRecoilState(rerenderUrlPage);
   const [firstRender, setFirstRender] = useState(true);
-
 
   const handleDelete = async (uid: string) => {
     try {
@@ -356,45 +355,45 @@ const MyUrls = () => {
               </TableRow>
             ))}
           </TableHeader>
-          {urlLoader ? (<TableBody>
-            {renderSkeletonRows()}
-          </TableBody>) : (
-             <TableBody>
-             {table.getRowModel().rows?.length ? (
-               table.getRowModel().rows.map((row) => (
-                 <motion.tr
-                   key={row.id}
-                   whileHover={{
-                     scale: 1.008,
-                     transition: { duration: 0.2 },
-                   }}
-                   className="border-y-[1px] border-white hover:bg-[#3a1d87]"
-                   data-state={row.getIsSelected() && "selected"}
-                 >
-                   {row.getVisibleCells().map((cell) => (
-                     <TableCell
-                       className="py-4 px-4 font-semibold text-xs sm:text-base md:text-lg max-w-4 sm:max-w-8 overflow-y-auto no-scrollbar"
-                       key={cell.id}
-                     >
-                       {flexRender(
-                         cell.column.columnDef.cell,
-                         cell.getContext()
-                       )}
-                     </TableCell>
-                   ))}
-                 </motion.tr>
-               ))
-             ) : (
-               <TableRow>
-                 <TableCell
-                   colSpan={columns.length}
-                   className="h-24 text-center"
-                 >
-                   No URL's found.
-                 </TableCell>
-               </TableRow>
-             )}
-           </TableBody>
+          {urlLoader ? (
+            <TableBody>{renderSkeletonRows()}</TableBody>
+          ) : (
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <motion.tr
+                    key={row.id}
+                    whileHover={{
+                      scale: 1.008,
+                      transition: { duration: 0.2 },
+                    }}
+                    className="border-y-[1px] border-white hover:bg-[#3a1d87]"
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        className="py-4 px-4 font-semibold text-xs sm:text-base md:text-lg max-w-4 sm:max-w-8 overflow-y-auto no-scrollbar"
+                        key={cell.id}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </motion.tr>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No URL's found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
           )}
         </Table>
       </>

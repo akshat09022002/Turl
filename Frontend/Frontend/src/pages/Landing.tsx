@@ -14,8 +14,6 @@ function Landing() {
 
         <GeneratorBar></GeneratorBar>
 
-        {/* {urlResult!="" && <UrlResult></UrlResult>} */}
-
         <SignupBanner></SignupBanner>
       </div>
     </div>
