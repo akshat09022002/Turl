@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { cn } from "../lib/utils";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import React, { useMemo, useRef } from "react";

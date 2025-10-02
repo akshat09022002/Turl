@@ -58,7 +58,12 @@ const OtpInput = ({
     setloading(true);
     try {
       await axios
-        .get<{ msg: string }>(
+        .get<{
+          firstName: string;
+          lastName: string;
+          email: string;
+          msg: string;
+        }>(
           `${import.meta.env.VITE_BACKEND_API}/user/verify-otp?otp=${Number(
             data.pin
           )}`,
@@ -66,7 +71,7 @@ const OtpInput = ({
             withCredentials: true,
           }
         )
-        .then((response: any) => {
+        .then((response) => {
           localStorage.setItem(
             "user",
             JSON.stringify({
@@ -82,9 +87,10 @@ const OtpInput = ({
           setSignupClose(false);
           setLoggedIn(true);
         });
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
       toast({
-        title: error.response.data.msg,
+        title: error?.response?.data?.msg,
       });
     } finally {
       setloading(false);

@@ -111,9 +111,10 @@ const PageTablelist = ({
           });
           setrerender((e) => e + 1);
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
       toast({
-        title: err.response.data.msg,
+        title: error?.response?.data?.msg,
       });
     }
   };

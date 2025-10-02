@@ -92,10 +92,11 @@ const ProvidePassword = ({
           }
           setFirstRender(false);
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
       toast({
         title: "Error",
-        description: err.response.data.msg,
+        description: error?.response?.data?.msg,
       });
     } finally {
       setIsLoading(false);

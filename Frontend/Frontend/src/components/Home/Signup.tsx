@@ -79,9 +79,10 @@ function Signup({
           );
           setIsOpenDialog(true);
         });
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
       toast({
-        title: error.response.data.msg,
+        title: error?.response?.data?.msg,
       });
     } finally {
       setLoading(false);

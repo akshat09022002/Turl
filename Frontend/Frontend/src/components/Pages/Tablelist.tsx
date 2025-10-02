@@ -114,9 +114,10 @@ const Tablelist = () => {
           });
           setrerenderValue((e) => e + 1);
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
       toast({
-        title: err.response.data.msg,
+        title: error?.response?.data?.msg,
       });
     }
   };
@@ -361,7 +362,7 @@ const Tablelist = () => {
           setData(response.data.Data);
           setPageLoader(false);
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
       setData([]);
       navigate("/");
     }

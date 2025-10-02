@@ -118,9 +118,10 @@ const UrlResult = ({
           setUrlResult(newUrl);
           debounceState("");
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
       toast({
-        title: err.response.data.msg,
+        title: error?.response?.data?.msg,
       });
     }
   }
@@ -146,8 +147,9 @@ const UrlResult = ({
         );
 
         setCanAdd(response.data.result);
-      } catch (error) {
-        console.error("Error checking custom UID:", error);
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { msg?: string } } };
+        console.error("Error checking custom UID:", error?.response?.data?.msg);
       } finally {
         setDebounceLoader(false);
       }

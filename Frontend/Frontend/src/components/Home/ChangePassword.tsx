@@ -76,9 +76,10 @@ const ChangePassword = ({
           });
           setOpenDialog(false);
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
       toast({
-        title: err.response.data.msg,
+        title: error?.response?.data?.msg,
       });
     } finally {
       setLoading(false);
