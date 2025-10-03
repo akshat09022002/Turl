@@ -20,13 +20,6 @@ jobs:
         with:
           node-version: 20  # Use the Node version your project needs
 
-      # 3. Install dependencies
-      - name: Install dependencies
-        run: |
-          echo "Installing root dependencies..."
-          npm install
-          echo "Root dependencies installed successfully"
-
       # 4. Run lint
       - name: Run Lint On Backend
         run: |
