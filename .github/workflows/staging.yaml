@@ -22,17 +22,34 @@ jobs:
 
       # 3. Install dependencies
       - name: Install dependencies
-        run: npm install
+        run: |
+          echo "Installing root dependencies..."
+          npm install
+          echo "Root dependencies installed successfully"
 
       # 4. Run lint
       - name: Run Lint On Backend
         run: |
+          echo "Changing to Backend directory..."
           cd Backend
+          echo "Current directory: $(pwd)"
+          echo "Installing Backend dependencies..."
+          npm install
+          echo "Backend dependencies installed successfully"
+          echo "Running Backend lint..."
           npm run lint
+          echo "Backend lint completed successfully"
 
       - name: Run Lint On Frontend
         run: |
+          echo "Changing to Frontend directory..."
           cd Frontend/Frontend
+          echo "Current directory: $(pwd)"
+          echo "Installing Frontend dependencies..."
+          npm install
+          echo "Frontend dependencies installed successfully"
+          echo "Running Frontend lint..."
           npm run lint
+          echo "Frontend lint completed successfully"
 
       
