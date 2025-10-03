@@ -1,23 +1,38 @@
-name: Feature Branches Checks
+name: Feature Branch Lint
 
 on:
-  push: 
+  push:
     branches:
       - 'feature/*'
 
 jobs:
-  lint-checks:
+  lint:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      # 1. Checkout the code
+      - name: Checkout repository
         uses: actions/checkout@v3
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          fetch-depth: 0
+          node-version: 20  # Use the Node version your project needs
 
-      - name: Run lint checks
-        uses: super-linter/super-linter@v8.2.0 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_ALL_CODEBASE: "true"
-          VALIDATE_BIOME_FORMAT: "false"
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm install
 
+      # 4. Run lint
+      - name: Run Lint On Backend
+        run: |
+          cd Backend
+          npm run lint
+
+      - name: Run Lint On Frontend
+        run: |
+          cd Frontend/Frontend
+          npm run lint
+
+      
