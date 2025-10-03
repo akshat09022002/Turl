@@ -30,7 +30,7 @@ jobs:
           npm install
           echo "Backend dependencies installed successfully"
           echo "Running Backend lint..."
-          npm run lint
+          npm run lint --quiet
           echo "Backend lint completed successfully"
 
       - name: Run Lint On Frontend
@@ -42,7 +42,7 @@ jobs:
           npm install
           echo "Frontend dependencies installed successfully"
           echo "Running Frontend lint..."
-          npm run lint
+          npm run lint --quiet
           echo "Frontend lint completed successfully"
 
       
