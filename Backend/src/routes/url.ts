@@ -218,7 +218,7 @@ router.post("/generateUrl", async (req: Request, res: Response) => {
         short_url: "turl.co.in/" + UID,
       });
     }
-  } catch{
+  } catch {
     return res.status(404).json({
       msg: "Something went wrong",
     });
