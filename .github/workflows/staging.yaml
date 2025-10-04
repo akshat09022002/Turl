@@ -88,7 +88,7 @@ jobs:
           echo "Job State: $job_state"
           
           # Check if job state is pending
-          if [ "$job_state" = "pending" ]; then
+          if [ "$job_state" = "PENDING" ]; then
             echo "Deployment request successful - job is pending"
             exit 0
           else
