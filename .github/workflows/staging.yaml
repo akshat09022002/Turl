@@ -1,9 +1,12 @@
 name: Feature Branch Lint
 
 on:
-  push:
+  pull_request:
     branches:
-      - 'feature/*'
+      - main
+      - staging
+      - deploy
+
 
 jobs:
   lint:
