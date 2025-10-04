@@ -1,4 +1,4 @@
-name: Feature Branch Lint
+name: Check Codebase & Deploy To Staging
 
 on:
   pull_request:
@@ -48,4 +48,46 @@ jobs:
           npm run lint --quiet
           echo "Frontend lint completed successfully"
 
-      
+  install-jq:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install jq
+        run: |
+          echo "Installing jq..."
+          sudo apt-get update
+          sudo apt-get install -y jq
+          echo "jq installed successfully"
+
+  deploy:
+    runs-on: ubuntu-latest
+    
+    environment: Staging
+
+    needs:
+      - lint
+      - install-jq
+
+    if: github.ref == 'refs/heads/staging'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: deploy to staging
+        run: |
+          echo "Requesting Deployment to Staging"
+          response=$(curl -X POST ${{secrets.STAGING_DEPLOYMENT_URL}})
+          echo "Deployment Response: $response"
+          
+          # Extract job state from response
+          job_state=$(echo $response | jq -r '.job.state')
+          echo "Job State: $job_state"
+          
+          # Check if job state is pending
+          if [ "$job_state" = "pending" ]; then
+            echo "Deployment request successful - job is pending"
+            exit 0
+          else
+            echo "Deployment request failed - job state: $job_state"
+            exit 1
+          fi
