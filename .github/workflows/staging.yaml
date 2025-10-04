@@ -7,6 +7,10 @@ on:
       - staging
       - deploy
 
+  push:
+    branches:
+      - staging
+
 
 jobs:
   lint:
