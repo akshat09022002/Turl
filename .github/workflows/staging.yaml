@@ -1,16 +1,12 @@
 name: Check Codebase & Deploy To Staging
 
 on:
+  push:
   pull_request:
     branches:
       - main
       - staging
       - deploy
-
-  push:
-    branches:
-      - staging
-
 
 jobs:
   lint:
@@ -25,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20  # Use the Node version your project needs
+          node-version: 20 # Use the Node version your project needs
 
       # 4. Run lint
       - name: Run Lint On Backend
@@ -64,7 +60,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    
+
     environment: Staging
 
     needs:
@@ -76,17 +72,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        
+
       - name: deploy to staging
         run: |
           echo "Requesting Deployment to Staging"
           response=$(curl -X POST ${{secrets.STAGING_DEPLOYMENT_URL}})
           echo "Deployment Response: $response"
-          
+
           # Extract job state from response
           job_state=$(echo $response | jq -r '.job.state')
           echo "Job State: $job_state"
-          
+
           # Check if job state is pending
           if [ "$job_state" = "PENDING" ]; then
             echo "Deployment request successful - job is pending"
