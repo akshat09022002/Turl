@@ -219,6 +219,8 @@ router.post("/generateUrl", async (req: Request, res: Response) => {
       });
     }
   } catch(error) {
+
+    
     return res.status(404).json({
       msg: "Something went wrong",
     });
