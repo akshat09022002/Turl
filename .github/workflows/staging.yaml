@@ -60,14 +60,13 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-
     environment: Staging
 
     needs:
       - lint
       - install-jq
 
-    if: github.ref == 'refs/heads/staging'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
 
     steps:
       - name: Checkout repository
