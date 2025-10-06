@@ -23,7 +23,11 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
+<<<<<<< HEAD
     origin: FRONTEND_URL,
+=======
+    origin: ["http://turl.co.in","https://turl-87gzpggx2-akshat09022002s-projects.vercel.app/"],
+>>>>>>> f15980bcde031a5d383568f03be6fa46bc229e17
     credentials: true,
   })
 );

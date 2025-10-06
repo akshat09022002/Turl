@@ -58,7 +58,12 @@ const EditDialogUrlPage = ({
           });
           setrerender((e) => e + 1);
         });
-    } catch (err) {}
+    } catch (err) {
+      const error = err as { response?: { data?: { msg?: string } } };
+      toast({
+        title: error?.response?.data?.msg,
+      });
+    }
     setOpenDialog(false);
   };
 

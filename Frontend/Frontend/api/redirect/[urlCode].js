@@ -21,6 +21,7 @@ export default async function handler(req, res) {
         msg: 'Server Error'
       });
     }
+<<<<<<< HEAD
 
     const data = await response.json();
 
@@ -31,6 +32,19 @@ export default async function handler(req, res) {
       res.status(404).json({
         msg: "URL not found",
       });
+=======
+  
+    // Fetch target URL from backend
+    try {
+      const response = axios.get(`${import.meta.env.VITE_BACKEND_API}/redirect/${urlCode}`);
+      if (response.data.url) {
+        res.status(301).redirect(response.data.url); // Server-side redirect
+      } else {
+        res.status(404).send("URL not found"); // Or redirect to homepage
+      }
+    } catch (error) {
+      res.status(500).send("Error fetching redirect");
+>>>>>>> f15980bcde031a5d383568f03be6fa46bc229e17
     }
   } catch (error) {
     console.error("Fetch error:", error);

@@ -88,8 +88,9 @@ const PageCreator = () => {
           }
         );
         setCanAdd(response.data.result);
-      } catch (error) {
-        console.error("Error checking custom UID:", error);
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { msg?: string } } };
+        console.error("Error checking custom UID:", error?.response?.data?.msg);
       } finally {
         setDebounceLoader(false);
       }
@@ -119,9 +120,10 @@ const PageCreator = () => {
           });
           setRerender((e) => e + 1);
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
       toast({
-        title: err.response.data.msg,
+        title: error?.response?.data?.msg,
       });
     } finally {
       form.reset();

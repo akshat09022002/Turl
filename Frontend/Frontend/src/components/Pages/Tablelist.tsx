@@ -114,9 +114,10 @@ const Tablelist = () => {
           });
           setrerenderValue((e) => e + 1);
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
       toast({
-        title: err.response.data.msg,
+        title: error?.response?.data?.msg,
       });
     }
   };
@@ -361,10 +362,14 @@ const Tablelist = () => {
           setData(response.data.Data);
           setPageLoader(false);
         });
+<<<<<<< HEAD
     } catch (err: any) {
       toast({
         title: err.response.data.msg,
       });
+=======
+    } catch (err: unknown) {
+>>>>>>> f15980bcde031a5d383568f03be6fa46bc229e17
       setData([]);
       navigate("/");
     }

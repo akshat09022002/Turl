@@ -52,10 +52,11 @@ const UrlPage = () => {
       setIsOwner(response.data.IsOwner);
       if (response.data.msg == "yes") return true;
       if (response.data.msg == "no") return false;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
       toast({
         title: "error",
-        description: err.response.data.msg,
+        description: error?.response?.data?.msg,
       });
     }
   };
@@ -110,10 +111,11 @@ const UrlPage = () => {
             }
             setFirstRender(false);
           });
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { msg?: string } } };
         toast({
           title: "Error",
-          description: err.response.data.msg,
+          description: error?.response?.data?.msg,
         });
       }
     }

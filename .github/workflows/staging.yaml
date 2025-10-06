@@ -1,0 +1,93 @@
+name: Check Codebase & Deploy To Staging
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+      - staging
+      - deploy
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the code
+      - name: Checkout repository
+      
+        uses: actions/checkout@v3
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20 # Use the Node version your project needs
+
+      # 4. Run lint
+      - name: Run Lint On Backend
+        run: |
+          echo "Changing to Backend directory..."
+          cd Backend
+          echo "Current directory: $(pwd)"
+          echo "Installing Backend dependencies..."
+          npm install
+          echo "Backend dependencies installed successfully"
+          echo "Running Backend lint..."
+          npm run lint --quiet
+          echo "Backend lint completed successfully"
+
+      - name: Run Lint On Frontend
+        run: |
+          echo "Changing to Frontend directory..."
+          cd Frontend/Frontend
+          echo "Current directory: $(pwd)"
+          echo "Installing Frontend dependencies..."
+          npm install
+          echo "Frontend dependencies installed successfully"
+          echo "Running Frontend lint..."
+          npm run lint --quiet
+          echo "Frontend lint completed successfully"
+
+  install-jq:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install jq
+        run: |
+          echo "Installing jq..."
+          sudo apt-get update
+          sudo apt-get install -y jq
+          echo "jq installed successfully"
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment: Staging
+
+    needs:
+      - lint
+      - install-jq
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: deploy to staging
+        run: |
+          echo "Requesting Deployment to Staging"
+          response=$(curl -X POST ${{secrets.STAGING_DEPLOYMENT_URL}})
+          echo "Deployment Response: $response"
+
+          # Extract job state from response
+          job_state=$(echo $response | jq -r '.job.state')
+          echo "Job State: $job_state"
+
+          # Check if job state is pending
+          if [ "$job_state" = "PENDING" ]; then
+            echo "Deployment request successful - job is pending"
+            exit 0
+          else
+            echo "Deployment request failed - job state: $job_state"
+            exit 1
+          fi

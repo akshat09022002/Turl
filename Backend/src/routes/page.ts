@@ -5,7 +5,6 @@ import {
   pageDetail,
   updatePageDetailType,
   updatePageDetail,
-  urlDetail,
 } from "../schema";
 import { PrismaClient } from "@prisma/client";
 import jwt, { JwtPayload } from "jsonwebtoken";
@@ -13,7 +12,7 @@ import dotevn from "dotenv";
 import bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
 import { middleware } from "../middleware/middleware";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import axios from "axios";
 
 const prisma = new PrismaClient();
@@ -41,15 +40,11 @@ function generateRandomCode(): string {
   return code;
 }
 
-interface CustomRequest extends Request {
-  userId: string;
-}
-
-router.post("/createPage", middleware, async (req: any, res) => {
+router.post("/createPage", middleware, async (req: Request, res: Response) => {
   try {
     const pageDetails: pageDetailType = req.body;
 
-    const userId = req.userId;
+    const userId = req.userId as string;
 
     const isSuccess = pageDetail.safeParse(pageDetails);
 
@@ -97,17 +92,17 @@ router.post("/createPage", middleware, async (req: any, res) => {
     return res.status(200).json({
       msg: "Page Created Successfully",
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({
       msg: "Internal Server Error",
     });
   }
 });
 
-router.post("/updatePage", middleware, async (req: any, res) => {
+router.post("/updatePage", middleware, async (req: Request, res: Response) => {
   try {
     const updateFields: updatePageDetailType = req.body;
-    const userId = req.userId;
+    const userId = req.userId as string;
 
     const isSuccess = updatePageDetail.safeParse(updateFields);
 
@@ -120,7 +115,7 @@ router.post("/updatePage", middleware, async (req: any, res) => {
     if (updateFields.password != undefined) {
       let password = updateFields.password;
       if (password != "") password = await bcrypt.hash(password, 10);
-      const updated = await prisma.page.update({
+      await prisma.page.update({
         where: {
           id: updateFields.id,
           userId: userId,
@@ -133,7 +128,7 @@ router.post("/updatePage", middleware, async (req: any, res) => {
         msg: "Page Password Updated",
       });
     } else if (updateFields.description != undefined) {
-      const updated = await prisma.page.update({
+      await prisma.page.update({
         where: {
           id: updateFields.id,
           userId: userId,
@@ -146,14 +141,14 @@ router.post("/updatePage", middleware, async (req: any, res) => {
         msg: "Description Password Updated",
       });
     }
-  } catch (err) {
+  } catch {
     return res.status(401).json({
       msg: "Invalid owner of page",
     });
   }
 });
 
-router.get("/getPages", middleware, async (req: any, res) => {
+router.get("/getPages", middleware, async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
 
@@ -173,14 +168,14 @@ router.get("/getPages", middleware, async (req: any, res) => {
       msg: "Fetched Successfully",
       Data: pages,
     });
-  } catch (err) {
+  } catch {
     return res.status(401).json({
       msg: "Invalid Request",
     });
   }
 });
 
-router.post("/geturls", async (req: any, res) => {
+router.post("/geturls", async (req: Request, res: Response) => {
   try {
     const pageFields: {
       password: string;
@@ -248,36 +243,40 @@ router.post("/geturls", async (req: any, res) => {
         }
       );
     }
-  } catch (err) {
+  } catch {
     return res.status(401).json({
       msg: "Something Went Wrong",
     });
   }
 });
 
-router.delete("/deleteUrl/*", middleware, async (req: any, res) => {
-  try {
-    const userId = req.userId;
-    const fullPath: string = req.params[0];
+router.delete(
+  "/deleteUrl/*",
+  middleware,
+  async (req: Request, res: Response) => {
+    try {
+      const userId = req.userId;
+      const fullPath: string = req.params[0];
 
-    const response = await prisma.page.delete({
-      where: {
-        userId: userId,
-        pageUID: fullPath,
-      },
-    });
+      await prisma.page.delete({
+        where: {
+          userId: userId,
+          pageUID: fullPath,
+        },
+      });
 
-    return res.status(200).json({
-      msg: "Page Deleted Successfully",
-    });
-  } catch (err: any) {
-    return res.status(403).json({
-      msg: "You Are Not Authorized To Delete This Page",
-    });
+      return res.status(200).json({
+        msg: "Page Deleted Successfully",
+      });
+    } catch {
+      return res.status(403).json({
+        msg: "You Are Not Authorized To Delete This Page",
+      });
+    }
   }
-});
+);
 
-router.post("/isValidUID/*", async (req: any, res) => {
+router.post("/isValidUID/*", async (req: Request, res: Response) => {
   try {
     const fullPath: string = req.params[0].split(",")[0];
 
@@ -294,16 +293,21 @@ router.post("/isValidUID/*", async (req: any, res) => {
     return res.status(200).json({
       result,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({
       msg: "Internal Server Error",
     });
   }
 });
 
-router.get("/hasPassword", async (req: any, res) => {
+router.get("/hasPassword", async (req: Request, res: Response) => {
   try {
-    const pageUID: string = req.query.id;
+    const pageUID: string = req.query.id as string;
+    if (!pageUID) {
+      return res.status(400).json({
+        msg: "Invalid Page Request",
+      });
+    }
     const token = req.cookies.token;
     let IsOwner = false;
     if (token) {
@@ -339,15 +343,14 @@ router.get("/hasPassword", async (req: any, res) => {
       msg: "no",
       IsOwner,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({
       msg: "Something Went Wrong",
     });
   }
 });
 
-router.post("/insertUrl", middleware, async (req: any, res) => {
-  const userId = req.userId;
+router.post("/insertUrl", middleware, async (req: Request, res: Response) => {
   const urlDetails: urlDetailType = req.body;
   try {
     const isSuccess = pageDetail.safeParse(urlDetails);
@@ -374,7 +377,7 @@ router.post("/insertUrl", middleware, async (req: any, res) => {
     return res.status(200).json({
       msg: "Url Added Successfully",
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({
       msg: "Internal Server Error",
     });

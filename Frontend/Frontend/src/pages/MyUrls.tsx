@@ -77,7 +77,10 @@ const MyUrls = () => {
   );
   const [renderUrls, setRerender] = useRecoilState(rerenderUrlPage);
   const [firstRender, setFirstRender] = useState(true);
+<<<<<<< HEAD
   const navigate = useNavigate();
+=======
+>>>>>>> f15980bcde031a5d383568f03be6fa46bc229e17
 
   const handleDelete = async (uid: string) => {
     try {
@@ -94,9 +97,10 @@ const MyUrls = () => {
           });
           setRerender((e) => e + 1);
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
       toast({
-        title: err.response.data.msg,
+        title: error?.response?.data?.msg,
       });
     }
   };
@@ -300,9 +304,10 @@ const MyUrls = () => {
           setFirstRender(false);
           setUrlLoader(false);
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
       toast({
-        title: err.response.data.msg,
+        title: error?.response?.data?.msg,
       });
       setData([]);
       navigate("/");
