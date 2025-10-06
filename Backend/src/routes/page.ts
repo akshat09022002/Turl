@@ -92,7 +92,7 @@ router.post("/createPage", middleware, async (req: Request, res: Response) => {
     return res.status(200).json({
       msg: "Page Created Successfully",
     });
-  } catch {
+  } catch (error) {
     return res.status(500).json({
       msg: "Internal Server Error",
     });
