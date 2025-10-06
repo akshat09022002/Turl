@@ -18,9 +18,8 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) throw Error("No JWT secret present");
+const JWT_SECRET = process.env.JWT_SECRET as string;
+const FRONTEND_URL = process.env.FRONTEND_URL as string;
 
 const router = express.Router();
 
@@ -89,7 +88,7 @@ router.post("/generateUrl", async (req: Request, res: Response) => {
       });
     }
 
-    if (jwtuserId != "") {
+    if (jwtuserId) {
       const userId: JwtPayload = jwt.verify(
         jwtuserId,
         JWT_SECRET
@@ -158,7 +157,7 @@ router.post("/generateUrl", async (req: Request, res: Response) => {
           });
 
           return res.status(200).json({
-            short_url: "turl.co.in/" + UID,
+            short_url: `${FRONTEND_URL.split("/")[2]}/${UID}`,
             msg: "Url generated successfully.",
           });
         } else {
@@ -180,7 +179,7 @@ router.post("/generateUrl", async (req: Request, res: Response) => {
         });
 
         return res.status(200).json({
-          short_url: "turl.co.in/" + UID,
+          short_url: `${FRONTEND_URL.split("/")[2]}/${UID}`,
         });
       }
     } else {
@@ -215,12 +214,14 @@ router.post("/generateUrl", async (req: Request, res: Response) => {
       });
 
       return res.status(200).json({
-        short_url: "turl.co.in/" + UID,
+        short_url: `${FRONTEND_URL.split("/")[2]}/${UID}`,
       });
     }
-  } catch {
+  } catch (err) {
+    console.log(err);
     return res.status(404).json({
       msg: "Something went wrong",
+      error: err,
     });
   }
 });

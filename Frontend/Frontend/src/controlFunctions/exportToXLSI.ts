@@ -31,10 +31,17 @@ export const exportToExcel = async (
   worksheet.addRow(["Description", "Link", "Encapsulated Link"]);
 
   tableData.forEach((row) => {
+<<<<<<< HEAD
+    const values=Object.values(row);
+    const description=values[3];
+    const link= `${import.meta.env.VITE_FRONTEND_API}/${values[1]}`
+    const encapsulatedLink=values[5] as string;
+=======
     const values = Object.values(row);
     const description = values[3];
     const link = `${import.meta.env.VITE_BACKEND_API}/${values[1]}`;
     const encapsulatedLink = values[5] as string;
+>>>>>>> f15980bcde031a5d383568f03be6fa46bc229e17
     const newRow = worksheet.addRow([description, link, encapsulatedLink]);
 
     newRow.getCell(2).value = { text: link, hyperlink: link };
@@ -95,9 +102,15 @@ export const exportToExcelMyUrls = async (tableData: urlType[]) => {
   worksheet.addRow(["Link", "Encapsulated Link"]);
 
   tableData.forEach((row) => {
+<<<<<<< HEAD
+    const values=Object.values(row);
+    const encapsulatedLink=values[1];
+    const link= `${import.meta.env.VITE_FRONTEND_API}/${values[5]}`;
+=======
     const values = Object.values(row);
     const encapsulatedLink = values[1];
     const link = `${import.meta.env.VITE_BACKEND_API}/${values[5]}`;
+>>>>>>> f15980bcde031a5d383568f03be6fa46bc229e17
     const newRow = worksheet.addRow([link, encapsulatedLink]);
 
     newRow.getCell(1).value = { text: link, hyperlink: link };

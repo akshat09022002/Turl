@@ -51,6 +51,7 @@ import {
   DropdownMenuSubTrigger,
 } from "@radix-ui/react-dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
 
 type urlType = {
   id: string;
@@ -76,6 +77,10 @@ const MyUrls = () => {
   );
   const [renderUrls, setRerender] = useRecoilState(rerenderUrlPage);
   const [firstRender, setFirstRender] = useState(true);
+<<<<<<< HEAD
+  const navigate = useNavigate();
+=======
+>>>>>>> f15980bcde031a5d383568f03be6fa46bc229e17
 
   const handleDelete = async (uid: string) => {
     try {
@@ -113,7 +118,7 @@ const MyUrls = () => {
       cell: ({ row }) => {
         return (
           <a
-            href={`${import.meta.env.VITE_BACKEND_API}/${row.getValue("uid")}`}
+            href={`${import.meta.env.VITE_FRONTEND_API}/${row.getValue("uid")}`}
             target="_blank"
             rel="noopener noreferrer"
             className="truncate hover:underline"
@@ -121,7 +126,7 @@ const MyUrls = () => {
               setRerender((e) => e + 1);
             }}
           >
-            {`${import.meta.env.VITE_BACKEND_API}/${row.getValue("uid")}`}
+            {`${import.meta.env.VITE_FRONTEND_API}/${row.getValue("uid")}`}
           </a>
         );
       },
@@ -172,7 +177,7 @@ const MyUrls = () => {
         const rowId = rowData.id;
         const rowLastVisit = new Date(rowData.lastVisit);
         const encodedURL = encodeURIComponent(
-          `${import.meta.env.VITE_BACKEND_API}/${rowData.uid}`
+          `${import.meta.env.VITE_FRONTEND_API}/${rowData.uid}`
         );
         const shareText =
           "This URL was generated using Turl, the ultimate URL shortener. Check it out!";
@@ -203,7 +208,7 @@ const MyUrls = () => {
                           <Copy
                             onClick={() => {
                               navigator.clipboard.writeText(
-                                `${import.meta.env.VITE_BACKEND_API}/${
+                                `${import.meta.env.VITE_FRONTEND_API}/${
                                   rowData.uid
                                 }`
                               );
@@ -304,6 +309,8 @@ const MyUrls = () => {
       toast({
         title: error?.response?.data?.msg,
       });
+      setData([]);
+      navigate("/");
     }
   };
 

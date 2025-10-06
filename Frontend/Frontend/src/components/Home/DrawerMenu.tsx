@@ -6,7 +6,7 @@ import { Avatar } from "flowbite-react";
 import axios from "axios";
 import { toast } from "@/hooks/use-toast";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { isSignedIn, rerender } from "@/store/atoms/atom";
+import { isSignedIn, rerender, rerenderUrlPage } from "@/store/atoms/atom";
 import DialogWindowHome from "./DialogWindowHome";
 import { useNavigate } from "react-router-dom";
 import ChangePassword from "./ChangePassword";
@@ -22,6 +22,7 @@ export function DrawerMenu() {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [customComponent, setCustomComponent] = useState<React.ReactNode>(null);
   const setrerenderValue = useSetRecoilState(rerender);
+  const setMyurlrerender= useSetRecoilState(rerenderUrlPage);
   const navigation = useNavigate();
 
   const handleClose = () => setIsOpen(false);
@@ -79,7 +80,7 @@ export function DrawerMenu() {
             <li
               className="py-4 sm:py-8 hover:scale-105 hover:bg-gradient-to-r hover:from-[#c70074] hover:to-[#3f2097] hover:bg-clip-text hover:text-transparent text-base sm:text-2xl"
               onClick={() => {
-                navigation("/myurls");
+                navigation("/fe/myurls");
               }}
             >
               My URLs
@@ -87,7 +88,7 @@ export function DrawerMenu() {
             <li
               className="py-4 sm:py-8 hover:scale-105 hover:bg-gradient-to-r hover:from-[#c70074] hover:to-[#3f2097] hover:bg-clip-text hover:text-transparent text-base sm:text-2xl"
               onClick={() => {
-                navigation("/pages");
+                navigation("/fe/pages");
               }}
             >
               My Pages
@@ -119,6 +120,7 @@ export function DrawerMenu() {
                     )
                     .then((response) => {
                       setrerenderValue((e) => e + 1);
+                      setMyurlrerender((e)=>e+1);
                       toast({
                         title: response.data.msg,
                       });

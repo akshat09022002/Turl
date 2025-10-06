@@ -17,9 +17,7 @@ import { middleware } from "../middleware/middleware";
 
 const prisma = new PrismaClient();
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) throw Error("No JWT secret present");
+const JWT_SECRET = process.env.JWT_SECRET as string;
 
 const app = express();
 app.use(express.json());
@@ -85,8 +83,9 @@ router.post("/signup", async (req, res) => {
     res.cookie("user", JSON.stringify(userDetails), {
       httpOnly: true,
       secure: true,
-      maxAge: 60 * 1000,
-      sameSite: "none",
+      maxAge: 5 * 60 * 1000,
+      sameSite: "lax",
+      path: "/",
     });
 
     await sendOtpEmail(userDetails.email, OTP).then((response) => {
@@ -143,6 +142,8 @@ router.post("/login", async (req, res) => {
         httpOnly: true,
         secure: false,
         maxAge: 60 * 24 * 60 * 60 * 1000,
+        sameSite: "lax",
+        path: "/",
       });
 
       res.clearCookie("user");
@@ -243,7 +244,20 @@ router.post(
 router.get("/verify-otp", async (req: Request, res: Response) => {
   try {
     const userDetails: userCredenType = JSON.parse(req.cookies.user);
+<<<<<<< HEAD
+    let inotp = req.query.otp;
+
+    const success = userCreden.safeParse(userDetails);
+
+    if (!success.success) {
+      return res.status(403).json({
+        msg: "Request Timeout. Try Signing Up Again",
+      });
+    }
+
+=======
     const inotp = req.query.otp as string;
+>>>>>>> f15980bcde031a5d383568f03be6fa46bc229e17
     const response = await prisma.otp.findUnique({
       where: {
         email: userDetails.email,

@@ -290,7 +290,7 @@ const Tablelist = () => {
                           <Copy
                             onClick={() => {
                               navigator.clipboard.writeText(
-                                `${import.meta.env.VITE_FRONTEND_API}/${
+                                `${import.meta.env.VITE_FRONTEND_API}/pg/${
                                   rowData.pageUID
                                 }`
                               );
@@ -362,7 +362,14 @@ const Tablelist = () => {
           setData(response.data.Data);
           setPageLoader(false);
         });
+<<<<<<< HEAD
+    } catch (err: any) {
+      toast({
+        title: err.response.data.msg,
+      });
+=======
     } catch (err: unknown) {
+>>>>>>> f15980bcde031a5d383568f03be6fa46bc229e17
       setData([]);
       navigate("/");
     }
