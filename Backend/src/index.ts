@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://turl.co.in","https://turl-87gzpggx2-akshat09022002s-projects.vercel.app/"],
+    origin: ["http://turl.co.in","https://staging.turl.co.in"],
     credentials: true,
   })
 );
