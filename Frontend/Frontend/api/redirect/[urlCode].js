@@ -17,6 +17,6 @@ export default async function handler(req, res) {
       res.status(404).send("URL not found"); // Or redirect to homepage
     }
   } catch (error) {
-    res.status(500).send("Error fetching redirect");
+    res.status(500).send("Error fetching redirect" + error);
   }
 }
