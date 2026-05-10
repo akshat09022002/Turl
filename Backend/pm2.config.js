@@ -8,6 +8,8 @@ module.exports = {
             name: "Turl",
             script: "./dist/index.js",
             watch: ["dist"],
+            max_restarts: 10,
+            restart_delay: 3000,
             env: {
                 "NODE_ENV": process.env.NODE_ENV,
                 "PORT": process.env.PORT,
