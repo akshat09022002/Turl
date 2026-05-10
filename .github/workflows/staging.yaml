@@ -66,7 +66,7 @@ jobs:
     needs:
       - lint
 
-    if: github.event_name == 'push' && github.ref == 'refs/heads/deploy'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
 
     steps:
       - name: SSH into server and pull latest code
@@ -76,42 +76,12 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/Turl
+            cd ~/Turl_Staging/Turl
             git fetch origin
-            git checkout deploy
-            git pull origin deploy
+            git checkout staging
+            git pull origin staging
             cd Backend
             npm install
-
-  deploy:
-    runs-on: ubuntu-latest
-    environment: Staging
-
-    needs:
-      - lint
-      - install-jq
-
-    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: deploy to staging
-        run: |
-          echo "Requesting Deployment to Staging"
-          response=$(curl -X POST ${{secrets.STAGING_DEPLOYMENT_URL}})
-          echo "Deployment Response: $response"
-
-          # Extract job state from response
-          job_state=$(echo $response | jq -r '.job.state')
-          echo "Job State: $job_state"
-
-          # Check if job state is pending
-          if [ "$job_state" = "PENDING" ]; then
-            echo "Deployment request successful - job is pending"
-            exit 0
-          else
-            echo "Deployment request failed - job state: $job_state"
-            exit 1
-          fi
+            echo "Installed Backend dependencies"
+            npm run dev
+            echo "Build is successful"
