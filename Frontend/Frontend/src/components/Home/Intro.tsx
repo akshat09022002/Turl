@@ -11,7 +11,7 @@ const Intro = () => {
             cursor: "",
           }}
           onInit={(typewriter) => {
-            typewriter.typeString("Welcome to Turl").start();
+            typewriter.typeString("Welcome to Turlk").start();
           }}
         />
       </div>
