@@ -20,6 +20,7 @@ const prisma = new PrismaClient();
 
 dotevn.config();
 
+
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
