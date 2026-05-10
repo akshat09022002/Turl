@@ -14,6 +14,7 @@ import cookieParser from "cookie-parser";
 import { middleware } from "../middleware/middleware";
 import { Request, Response } from "express";
 import axios from "axios";
+import { secrets } from "../secrets";
 
 const prisma = new PrismaClient();
 
@@ -22,8 +23,8 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const BACKEND_URL = process.env.BACKEND_URL;
+const JWT_SECRET = secrets.JWT_SECRET;
+const BACKEND_URL = secrets.BACKEND_URL;
 if (!JWT_SECRET) throw Error("No JWT Present");
 if (!BACKEND_URL) throw Error("No BACKEND_URL present");
 

@@ -14,10 +14,11 @@ import cookieParser from "cookie-parser";
 import otpGenerator from "otp-generator";
 import { sendOtpEmail } from "./nodemailer";
 import { middleware } from "../middleware/middleware";
+import { secrets } from "../secrets";
 
 const prisma = new PrismaClient();
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = secrets.JWT_SECRET;
 
 if (!JWT_SECRET) throw Error("No JWT secret present");
 
