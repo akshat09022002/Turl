@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
   // Fetch target URL from backend
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_API}/redirect/${urlCode}`);
+    const response = await axios.get(`${process.env.VITE_BACKEND_API}/redirect/${urlCode}`);
     if (response.data.url) {
       res.status(302).redirect(response.data.url); // Server-side redirect
     } else {
