@@ -10,6 +10,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { middleware } from "../middleware/middleware";
+import { secrets } from "../secrets";
 
 dotenv.config();
 const prisma = new PrismaClient();
@@ -18,7 +19,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = secrets.JWT_SECRET;
 
 if (!JWT_SECRET) throw Error("No JWT secret present");
 
@@ -81,6 +82,7 @@ router.post("/generateUrl", async (req: Request, res: Response) => {
   try {
     const response: urlDetailType = req.body;
     const jwtuserId: string = req.cookies.token;
+    const prefix= secrets.BACKEND_URL;
 
     const isSuccess = urlDetail.safeParse(response);
     if (!isSuccess.success) {
@@ -158,7 +160,7 @@ router.post("/generateUrl", async (req: Request, res: Response) => {
           });
 
           return res.status(200).json({
-            short_url: "turl.co.in/" + UID,
+            short_url: prefix + "/" + UID,
             msg: "Url generated successfully.",
           });
         } else {
@@ -180,7 +182,7 @@ router.post("/generateUrl", async (req: Request, res: Response) => {
         });
 
         return res.status(200).json({
-          short_url: "turl.co.in/" + UID,
+          short_url: prefix + "/" + UID,
         });
       }
     } else {
