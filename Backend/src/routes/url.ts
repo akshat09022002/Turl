@@ -217,7 +217,7 @@ router.post("/generateUrl", async (req: Request, res: Response) => {
       });
 
       return res.status(200).json({
-        short_url: "turl.co.in/" + UID,
+        short_url: prefix +"/" + UID,
       });
     }
   } catch {
