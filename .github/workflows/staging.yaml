@@ -85,4 +85,5 @@ jobs:
             echo "Installed Backend dependencies"
             npx tsc -b
             echo "TypeScript compiled successfully"
-            echo "Build is successful"
+            pm2 startOrRestart pm2.config.js
+            echo "Deployment successful"
