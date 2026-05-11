@@ -14,7 +14,7 @@ import { secrets } from "../secrets";
 
 dotenv.config();
 const prisma = new PrismaClient();
-
+// This is a comment to see if pm2 logs work
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
