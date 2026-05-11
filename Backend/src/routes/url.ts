@@ -222,9 +222,11 @@ router.post("/generateUrl", async (req: Request, res: Response) => {
         short_url: prefix +"/" + UID,
       });
     }
-  } catch {
+  } catch(error) {
+    console.log(error)
     return res.status(404).json({
       msg: "Something went wrong",
+      error: error
     });
   }
 });
