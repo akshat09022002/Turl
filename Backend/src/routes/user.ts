@@ -155,11 +155,13 @@ router.post("/login", async (req, res) => {
         email: response.email.toLowerCase(),
       });
     });
-  } catch {
+  } catch (error) {
+    console.log(error)
     res.clearCookie("user");
 
     return res.status(401).json({
       msg: "Something Went Wrong Try Again After Some Time",
+      error: error
     });
   }
 });
