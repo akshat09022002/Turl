@@ -93,7 +93,7 @@ router.post("/generateUrl", async (req: Request, res: Response) => {
       });
     }
 
-    if (jwtuserId != "") {
+    if (jwtuserId) {
       const userId: JwtPayload = jwt.verify(
         jwtuserId,
         JWT_SECRET
