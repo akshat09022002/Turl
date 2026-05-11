@@ -7,7 +7,7 @@ module.exports = {
         {
             name: "Turl-Staging",
             script: "./dist/index.js",
-
+            watch: ["dist"],
             max_restarts: 10,
             restart_delay: 3000,
             env: {
