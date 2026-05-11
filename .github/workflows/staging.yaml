@@ -83,5 +83,6 @@ jobs:
             cd Backend
             npm install
             echo "Installed Backend dependencies"
-            npm run dev
+            npx tsc -b
+            echo "TypeScript compiled successfully"
             echo "Build is successful"
